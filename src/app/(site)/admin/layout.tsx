@@ -21,8 +21,15 @@ const adminNav: SubNavItem[] = [
   { href: "/admin/innehall", label: "Innehåll" },
   { href: "/admin/felanmalningar", label: "Felanmälningar" },
   { href: "/admin/medlemmar", label: "Medlemmar" },
-  { href: "/admin/lagenheter", label: "Lägenheter" },
-  { href: "/admin/till-salu", label: "Till salu" },
+  {
+    href: "/admin/lagenheter",
+    label: "Fastigheten",
+    children: [
+      { href: "/admin/lagenheter", label: "Hus och lägenheter" },
+      { href: "/admin/till-salu", label: "Till salu" },
+      { href: "/admin/tavlor", label: "Trapphustavlor" },
+    ],
+  },
 ];
 
 export default async function AdminLayout({
