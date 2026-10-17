@@ -17,9 +17,11 @@
 
 generator client {
   provider      = "prisma-client-js"
-  // native för den egna datorn, rhel-openssl-3.0.x för Netlifys servrar.
-  // Bygget sker på en annan maskin än där sajten sedan kör.
-  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+  // native för den egna datorn, debian-openssl-3.0.x för Docker-imagen
+  // (node:22-bookworm-slim, se Dockerfile). Bygget i Docker genererar klienten
+  // på samma plattform som den kör på, men målet skrivs ut så att det inte
+  // beror på var `prisma generate` råkar köras.
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
