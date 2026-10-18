@@ -2,6 +2,7 @@ import Link from "next/link";
 import { siteConfig } from "@/config/siteConfig";
 import { navGroups } from "@/config/site";
 import { AddressDetails, EmailLink, PhoneLink } from "@/components/association";
+import { DemoNamn } from "@/components/demo/demo-namn";
 import type { AssociationProfile } from "@/lib/types";
 
 /** Länkfärg i footern: dämpad, mossgrön vid hover. */
@@ -20,7 +21,7 @@ export function SiteFooter({ association }: { association: AssociationProfile })
       <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 sm:py-16 lg:grid-cols-[1.5fr_repeat(5,1fr)] lg:gap-8">
         <div>
           <p className="font-display text-xl font-normal tracking-tight text-ink">
-            {association.name}
+            <DemoNamn namn={association.name} />
           </p>
           <AddressDetails
             address={association}
@@ -90,7 +91,7 @@ export function SiteFooter({ association }: { association: AssociationProfile })
 
       <div className="border-t border-border">
         <div className="mx-auto w-full max-w-6xl px-4 py-6 text-xs text-muted sm:px-6">
-          © {year} {association.name}. Alla rättigheter förbehållna.
+          © {year} <DemoNamn namn={association.name} />. Alla rättigheter förbehållna.
         </div>
       </div>
     </footer>

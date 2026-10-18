@@ -313,11 +313,16 @@ body {
   }
 }
 
-/* Hero: bakgrundsbilden tonar fram och zoomar mycket långsamt ut, en gång.
+/* Hero: bakgrundsbilden tonar fram och zoomar långsamt ut, en gång.
    Tona och zoom är två animationer, så att tonen är kort och zoomen lång, och
    de startar först när bilden har laddat (klassen is-loaded sätts i headern) –
    annars kan bilden dyka upp mitt i rörelsen. translate3d + will-change lägger
-   bilden i ett eget kompositlager, så att zoomen glider utan att hacka. */
+   bilden i ett eget kompositlager.
+   Rörelsen får inte bli för långsam: under någon pixel per bildruta avrundar
+   webbläsaren (tydligast Firefox) bildens läge till hela pixlar, och bilden
+   hoppar en pixel i taget i stället för att glida. Därför 8 % på 14 s med en
+   mjuk inbromsning, och en osynlig vridning (0.01deg) som får webbläsaren att
+   rita bilden mellan pixlarna. */
 @keyframes heroImageFade {
   from {
     opacity: 0;
@@ -328,15 +333,15 @@ body {
 }
 @keyframes heroImageZoom {
   from {
-    transform: translate3d(0, 0, 0) scale(1.05);
+    transform: translate3d(0, 0, 0) scale(1.08) rotate(0.01deg);
   }
   to {
-    transform: translate3d(0, 0, 0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1) rotate(0.01deg);
   }
 }
 .hero-image {
   opacity: 0;
-  transform: translate3d(0, 0, 0) scale(1.05);
+  transform: translate3d(0, 0, 0) scale(1.08) rotate(0.01deg);
   transform-origin: 60% 40%;
   will-change: transform, opacity;
   backface-visibility: hidden;
@@ -344,7 +349,7 @@ body {
 .hero-image.is-loaded {
   animation:
     heroImageFade 1.6s ease-out forwards,
-    heroImageZoom 20s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+    heroImageZoom 14s cubic-bezier(0.4, 0, 0.3, 1) forwards;
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-image,
