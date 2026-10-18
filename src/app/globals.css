@@ -313,16 +313,16 @@ body {
   }
 }
 
-/* Hero: bakgrundsbilden tonar fram och zoomar långsamt ut, en gång.
+/* Hero: bakgrundsbilden tonar fram och zoomar ut, en gång.
    Tona och zoom är två animationer, så att tonen är kort och zoomen lång, och
    de startar först när bilden har laddat (klassen is-loaded sätts i headern) –
    annars kan bilden dyka upp mitt i rörelsen. translate3d + will-change lägger
    bilden i ett eget kompositlager.
    Rörelsen får inte bli för långsam: under någon pixel per bildruta avrundar
    webbläsaren (tydligast Firefox) bildens läge till hela pixlar, och bilden
-   hoppar en pixel i taget i stället för att glida. Därför 8 % på 14 s med en
-   mjuk inbromsning, och en osynlig vridning (0.01deg) som får webbläsaren att
-   rita bilden mellan pixlarna. */
+   hoppar en pixel i taget i stället för att glida. Därför en kort zoom (3 s)
+   med mjuk inbromsning, och en osynlig vridning (0.01deg) som får webbläsaren
+   att rita bilden mellan pixlarna. */
 @keyframes heroImageFade {
   from {
     opacity: 0;
@@ -349,7 +349,7 @@ body {
 .hero-image.is-loaded {
   animation:
     heroImageFade 1.6s ease-out forwards,
-    heroImageZoom 14s cubic-bezier(0.4, 0, 0.3, 1) forwards;
+    heroImageZoom 3s cubic-bezier(0.4, 0, 0.3, 1) forwards;
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-image,
