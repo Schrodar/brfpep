@@ -34,6 +34,8 @@ ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
 ARG NEXT_PUBLIC_HERO_VIDEO
+# Demoläget (valfritt, se README): behövs vid bygget för noindex på de förrenderade sidorna.
+ARG DEMO_MODE
 
 ENV NEXT_TELEMETRY_DISABLED=1
 # Tak för byggets minne, så att ett bygge på den lilla servern inte tränger

@@ -147,6 +147,44 @@ localhost → Advanced → Concurrent builds = 1). Dockerfilen sätter ett minne
 för bygget; sätt gärna även ett minnestak per container (ca 350 MB) under
 applikationens *Resource Limits*.
 
+## Demoläge (säljdemo)
+
+Brf Pep är en demoförening. Med `DEMO_MODE=true` blir sajten en personlig demo för
+säljbreven som skickas från webcrawlern (JnM Creative studio).
+
+**Så fungerar det:**
+
+1. Säljbrevets knapp länkar till `https://<demo>/?f=<föreningens namn>&s=<signatur>`.
+   Signaturen är HMAC-SHA256 (hex, de första 32 tecknen) av namnet, med hemligheten
+   `DEMO_LINK_SECRET` – samma hemlighet som i webcrawlerns `.env`.
+2. Proxyn (`src/proxy.ts`, `src/lib/demo.ts`) kontrollerar signaturen på servern. Stämmer
+   den sätts cookien `demo_forening` (30 dagar), och besökaren skickas vidare till `/`
+   utan parametrar. En felaktig eller påhittad länk ger vanlig demo – ingen kan få sajten
+   att visa godtycklig text.
+3. Webbläsaren läser cookien (`useDemoForening`): startsidan hälsar "Välkommen till
+   {förening}", namnet visas i sidhuvudet och ett diskret kort nere till höger förklarar
+   att det är en demo. Sidorna förblir statiska.
+4. Med `DEMO_MODE` påslaget får sidorna `noindex`, så att demon inte syns i sökmotorer.
+
+**Miljövariabler i Coolify** (utöver tabellen ovan):
+
+| Variabel | Vid bygget | Vid körning |
+|---|:---:|:---:|
+| `DEMO_MODE=true` | ✓ (för `noindex`) | ✓ (för demolänkarna) |
+| `DEMO_LINK_SECRET` | | ✓ |
+
+**Mejlbilder:** säljbrevets produktbilder ligger i `public/mejl/` (`hemsida.jpg`,
+`tavla.jpg`) och nås på `https://<demo>/mejl/…`. De tas fram i webcrawlern med
+`mejl/bildkallor/fota.py` och kopieras hit. I webcrawlerns Inställningar anges
+`https://<demo>/mejl/` som adress till mejlbilderna.
+
+**Tavlan i demon:** skapa en skärm under Admin → Tavlor på demon och ange dess adress
+(`/tavla/<token>`) som "Länk till tavlan i demon" i webcrawlerns Inställningar. Det är
+innehåll i demoföreningen, ingen kod.
+
+Demoläget ändrar inget i databasen eller schemat, och utan `DEMO_MODE` beter sig sajten
+exakt som förut.
+
 ## Funktioner
 
 **Publikt**

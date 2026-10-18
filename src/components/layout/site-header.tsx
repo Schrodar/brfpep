@@ -9,6 +9,7 @@ import { TransitionLink } from "@/components/page-transition/TransitionLink";
 import { NavDrawer } from "@/components/layout/nav-drawer";
 import { AuthButton } from "@/components/layout/auth-button";
 import { AssociationLogo } from "@/components/association";
+import { useDemoForening } from "@/components/demo/use-demo-forening";
 import { siteConfig } from "@/config/siteConfig";
 import type { AssociationProfile } from "@/lib/types";
 import { useCurrentMember } from "@/lib/use-current-member";
@@ -29,7 +30,15 @@ export function SiteHeader({
   // Sidorna är statiska, så inloggningen läses här i webbläsaren.
   const { signedIn, member } = useCurrentMember();
   const isHome = pathname === "/";
-  const shortName = shortNameOf(association);
+  // Demoläget (src/lib/demo.ts): öppnad via en personlig demolänk visas föreningens eget
+  // namn, och demoföreningens ort och beskrivning byts mot en neutral text.
+  const demoNamn = useDemoForening();
+  const shortName = demoNamn ?? shortNameOf(association);
+  const title = demoNamn ? `Välkommen till ${demoNamn}` : heroTitle;
+  const subtitle = demoNamn
+    ? "Så här kan er förenings hemsida se ut – med nyheter, dokument och felanmälan samlat på ett ställe."
+    : heroSubtitle;
+  const city = demoNamn ? null : association.city;
   const { hero } = siteConfig;
 
   if (!isHome) {
@@ -96,12 +105,12 @@ export function SiteHeader({
       {/* Hero-innehåll. Headern tar hela skärmens höjd. */}
       <div className="relative z-10 mx-auto flex min-h-svh w-full max-w-6xl items-end px-4 pb-16 pt-32 sm:px-6 sm:pb-24 sm:pt-40 lg:pb-28">
         <div className="max-w-3xl">
-          {association.city ? (
+          {city ? (
             <p
               className="hero-fade font-body text-sm font-semibold uppercase tracking-[0.2em] text-white/70"
               style={{ animationDelay: "1.5s" }}
             >
-              {association.city}
+              {city}
             </p>
           ) : null}
 
@@ -109,15 +118,15 @@ export function SiteHeader({
             className="hero-fade mt-4 max-w-[15ch] font-display text-4xl font-medium leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-7xl"
             style={{ animationDelay: "1.65s" }}
           >
-            {heroTitle}
+            {title}
           </h1>
 
-          {heroSubtitle ? (
+          {subtitle ? (
             <p
               className="hero-fade mt-6 max-w-2xl font-body text-base leading-relaxed text-white/80 sm:text-xl"
               style={{ animationDelay: "1.85s" }}
             >
-              {heroSubtitle}
+              {subtitle}
             </p>
           ) : null}
 

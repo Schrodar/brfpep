@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import { siteConfig } from "@/config/siteConfig";
 import { getAssociationProfile } from "@/lib/data";
+import { demolageAktivt } from "@/lib/demo";
 import { shortNameOf } from "@/lib/utils";
 import "./globals.css";
 
@@ -40,6 +41,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: `${association.name}${place}. Här hittar du information för boende, mäklare och besökare.`,
     icons: { icon: siteConfig.logo.favicon },
+    // Demon (src/lib/demo.ts) ska inte synas i sökmotorer. DEMO_MODE måste därför
+    // finnas redan vid bygget, eftersom sidorna renderas då.
+    ...(demolageAktivt() ? { robots: { index: false, follow: false } } : {}),
   };
 }
 

@@ -1,3 +1,4 @@
+import { DemoBanderoll } from "@/components/demo/demo-banderoll";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { TransitionProvider } from "@/components/page-transition/TransitionProvider";
@@ -33,6 +34,8 @@ export async function SiteChrome({ children }: { children: React.ReactNode }) {
         </main>
 
         <SiteFooter association={association} />
+        {/* Syns bara när demon öppnats via en personlig demolänk (demoläget). */}
+        <DemoBanderoll />
       </TransitionProvider>
     </div>
   );
