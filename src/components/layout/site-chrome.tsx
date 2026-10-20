@@ -4,6 +4,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { TransitionProvider } from "@/components/page-transition/TransitionProvider";
 import { PageTransition } from "@/components/page-transition/PageTransition";
 import { getAssociationProfile, getSiteContent } from "@/lib/data";
+import { demolageAktivt } from "@/lib/demo";
 
 /**
  * Header, innehåll och footer. Används av (site)/layout.tsx och av 404-sidan,
@@ -27,13 +28,14 @@ export async function SiteChrome({ children }: { children: React.ReactNode }) {
           association={association}
           heroTitle={siteContent.heroTitle}
           heroSubtitle={siteContent.heroSubtitle}
+          demo={demolageAktivt()}
         />
 
         <main className="flex-1">
           <PageTransition>{children}</PageTransition>
         </main>
 
-        <SiteFooter association={association} />
+        <SiteFooter association={association} demo={demolageAktivt()} />
         {/* Syns bara när demon öppnats via en personlig demolänk (demoläget). */}
         <DemoBanderoll />
       </TransitionProvider>

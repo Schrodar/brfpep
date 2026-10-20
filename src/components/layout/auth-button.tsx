@@ -110,10 +110,17 @@ export function AdminButton({
 export function AuthButton({
   signedIn,
   variant = "default",
+  demo = false,
 }: {
   /** null = sessionen är inte kontrollerad än (se useCurrentMember). */
   signedIn: boolean | null;
   variant?: AuthButtonVariant;
+  /**
+   * Demoläget (DEMO_MODE): "Logga in" öppnar adminpanelens visningsläge
+   * (/admin/demo) i stället för inloggningen. Den som har ett riktigt konto
+   * loggar in på /logga-in, som finns kvar.
+   */
+  demo?: boolean;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -126,6 +133,17 @@ export function AuthButton({
         <Icon direction="in" />
         <span className="sr-only sm:not-sr-only">Logga in</span>
       </span>
+    );
+  }
+
+  if (!signedIn && demo) {
+    // Vanlig länk: /admin/demo är en route som sätter visningslägets cookie
+    // och skickar vidare – ingen sida att navigera till på klientsidan.
+    return (
+      <a href="/admin/demo" className={buttonClass(variant)}>
+        <Icon direction="in" />
+        <span className="sr-only sm:not-sr-only">Logga in</span>
+      </a>
     );
   }
 

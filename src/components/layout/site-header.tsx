@@ -19,12 +19,15 @@ interface SiteHeaderProps {
   association: AssociationProfile;
   heroTitle: string;
   heroSubtitle: string;
+  /** DEMO_MODE: "Logga in" öppnar adminpanelens visningsläge. */
+  demo?: boolean;
 }
 
 export function SiteHeader({
   association,
   heroTitle,
   heroSubtitle,
+  demo = false,
 }: SiteHeaderProps) {
   const pathname = usePathname();
   // Sidorna är statiska, så inloggningen läses här i webbläsaren.
@@ -59,7 +62,7 @@ export function SiteHeader({
 
           <div className="flex items-center gap-2">
             {isAdmin ? <AdminButton variant="default" /> : null}
-            <AuthButton signedIn={signedIn} variant="default" />
+            <AuthButton signedIn={signedIn} variant="default" demo={demo} />
             {/* NavDrawer visar en platshållare här. Själva knappen portaleras till body. */}
             <NavDrawer member={member} association={association} variant="default" />
           </div>
@@ -102,7 +105,7 @@ export function SiteHeader({
 
           <div className="flex items-center gap-2">
             {isAdmin ? <AdminButton variant="hero" /> : null}
-            <AuthButton signedIn={signedIn} variant="hero" />
+            <AuthButton signedIn={signedIn} variant="hero" demo={demo} />
             {/* NavDrawer visar en platshållare här. Själva knappen portaleras till body. */}
             <NavDrawer member={member} association={association} variant="hero" />
           </div>

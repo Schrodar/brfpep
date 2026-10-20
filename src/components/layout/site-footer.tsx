@@ -13,7 +13,14 @@ const footerLink = "transition-colors duration-200 hover:text-moss";
  * benvita bakgrunden, tunna varma linjer, föreningens namn i serif och
  * kolumnrubriker som ögonbrynsrader.
  */
-export function SiteFooter({ association }: { association: AssociationProfile }) {
+export function SiteFooter({
+  association,
+  demo = false,
+}: {
+  association: AssociationProfile;
+  /** DEMO_MODE: inloggningslänken öppnar adminpanelens visningsläge. */
+  demo?: boolean;
+}) {
   const year = new Date().getFullYear();
 
   return (
@@ -76,9 +83,16 @@ export function SiteFooter({ association }: { association: AssociationProfile })
           <p className="eyebrow">Övrigt</p>
           <ul className="mt-4 space-y-2.5 text-sm text-muted">
             <li>
-              <Link href={siteConfig.links.login} className={footerLink}>
-                Logga in / medlemssidor
-              </Link>
+              {demo ? (
+                // Vanlig länk: /admin/demo är en route, ingen sida.
+                <a href="/admin/demo" className={footerLink}>
+                  Logga in / medlemssidor
+                </a>
+              ) : (
+                <Link href={siteConfig.links.login} className={footerLink}>
+                  Logga in / medlemssidor
+                </Link>
+              )}
             </li>
             <li>
               <Link href="/integritetspolicy" className={footerLink}>
