@@ -34,14 +34,16 @@ export interface HeroBackground {
  *   image – visas när ingen film används
  *   båda bortkommenterade → den gröna bakgrunden (brand-800)
  *
- * Filmen anges per deploy i NEXT_PUBLIC_HERO_VIDEO, t.ex. "/videos/hero.mp4"
- * eller en CDN-adress. Den ligger inte i repot: filmen är föreningens egen
- * (eller licensierad) och får sällan spridas vidare i ett publikt repo.
- * Bilden läggs i public/images/. Raden och filen är sajtspecifika – se README.
+ * Brf Pep (demon) har sin film i repot: public/videos/hero.mp4, komprimerad
+ * till 2,5 MB (1280×720, H.264, utan ljud, faststart). NEXT_PUBLIC_HERO_VIDEO
+ * går före om den är satt. Med film blir bilden poster: första rutan ur filmen,
+ * så att inget byter motiv när filmen börjar. Stillbilden från tiden före
+ * filmen ligger kvar som public/images/hero.webp.
+ * Raden och filerna är sajtspecifika – se README.
  */
 const hero: HeroBackground = {
-  video: process.env.NEXT_PUBLIC_HERO_VIDEO,
-  image: "/images/hero.webp",
+  video: process.env.NEXT_PUBLIC_HERO_VIDEO || "/videos/hero.mp4",
+  image: "/images/hero-poster.webp",
 };
 
 export const siteConfig = {

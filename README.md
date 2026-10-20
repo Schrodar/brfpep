@@ -138,9 +138,10 @@ förrenderas med föreningens data, så bygget läser databasen, och `NEXT_PUBLI
 bakas in i klientkoden – ändras de krävs ett nytt bygge, inte bara omstart.
 `DIRECT_URL` behövs bara när migreringar körs (lokalt), inte i Coolify.
 
-Herofilmen ligger inte i repot och följer därför inte med i bygget: lägg den i
-Supabase Storage (publik bucket) eller på en CDN och ange adressen i
-`NEXT_PUBLIC_HERO_VIDEO`.
+Herofilmen för Brf Pep ligger i repot (`public/videos/hero.mp4`, komprimerad till
+2,5 MB) och följer med i bygget – `NEXT_PUBLIC_HERO_VIDEO` behövs inte. Sätts den
+ändå går den före. Posterbilden är filmens första ruta
+(`public/images/hero-poster.webp`).
 
 Servern har 2 vCPU/4 GB: ställ Coolify på **ett bygge i taget** (Servers →
 localhost → Advanced → Concurrent builds = 1). Dockerfilen sätter ett minnestak
@@ -181,6 +182,14 @@ säljbreven som skickas från webcrawlern (JnM Creative studio).
 **Tavlan i demon:** skapa en skärm under Admin → Tavlor på demon och ange dess adress
 (`/tavla/<token>`) som "Länk till tavlan i demon" i webcrawlerns Inställningar. Det är
 innehåll i demoföreningen, ingen kod.
+
+**Visningsläge för adminpanelen:** demokortet har länken "Prova styrelsens adminpanel"
+(`/admin/demo`). Den sätter cookien `demo_admin` (ett dygn) och öppnar adminpanelen utan
+inloggning, med en banner om att inget sparas. Varje sparning stoppas i `requireAdmin()`
+innan actionen gjort något – även borttagning av inloggningskonton och uppladdningar – och
+tenant-klienten vägrar dessutom alla skrivningar under en sådan request. Besökaren får
+beskedet "Det här är en demo" (`admin/error.tsx`). `/admin/demo?avsluta` tar bort cookien.
+Se `src/lib/demo-admin.ts`. Utan `DEMO_MODE` svarar `/admin/demo` 404.
 
 Demoläget ändrar inget i databasen eller schemat, och utan `DEMO_MODE` beter sig sajten
 exakt som förut.
@@ -236,7 +245,8 @@ exakt som förut.
 > **Sajtspecifikt – skriv inte över vid synk från BrfStart:** i kopiorna
 > (brfdosa, brfpep) skiljer sig `README.md` (rubriken), `package.json` (namn,
 > inga db-skript), `prisma/schema.prisma` (varningen), `src/config/siteConfig.ts`
-> (heron) och `public/images/hero.webp`. För över allt annat som det är.
+> (heron), `public/images/hero*.webp`, `public/videos/hero.mp4` och `.gitignore`
+> (filmen). För över allt annat som det är.
 5. **Startinnehåll:** ändra innehållet direkt i adminpanelen, eller redigera
    seed-datan i [`prisma/seed.ts`](prisma/seed.ts) och kör om `npm run db:seed`.
 

@@ -6,6 +6,7 @@ import {
   isLoggedWrite,
   recordSupportChange,
 } from "@/lib/support-log";
+import { DemoReadOnlyError, isDemoReadOnly } from "@/lib/demo-admin";
 
 /**
  * =============================================================================
@@ -110,6 +111,19 @@ export async function getCurrentAssociationId(): Promise<string> {
   return (await getCurrentAssociation()).id;
 }
 
+/** Alla operationer som ändrar något. */
+const WRITE_OPS = new Set([
+  "create",
+  "createMany",
+  "createManyAndReturn",
+  "update",
+  "updateMany",
+  "updateManyAndReturn",
+  "upsert",
+  "delete",
+  "deleteMany",
+]);
+
 function buildTenantClient(associationId: string) {
   return prisma.$extends({
     query: {
@@ -121,6 +135,12 @@ function buildTenantClient(associationId: string) {
             a.where = { ...(a.where ?? {}), associationId };
           }
           // create/createMany: associationId sätts explicit i datalagret.
+
+          // Demons visningsläge skriver aldrig – extra skydd utöver
+          // requireAdmin(), som redan stoppar varje server action.
+          if (isDemoReadOnly() && WRITE_OPS.has(operation)) {
+            throw new DemoReadOnlyError();
+          }
 
           // Under ett supportläge loggas varje skrivning för styrelsen. Utan
           // supportläge kostar det här ingenting – ingen databasfråga.

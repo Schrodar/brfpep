@@ -50,6 +50,15 @@ export function DemoBanderoll() {
         Det här är en demo av hur er förenings hemsida kan se ut. Klicka runt fritt – och svara på
         mejlet, så visar jag den gärna på ert nästa styrelsemöte.
       </p>
+      {/* Vanlig länk, inte TransitionLink: adressen är en route som sätter
+          visningslägets cookie och skickar vidare till adminpanelen. */}
+      <a
+        href="/admin/demo"
+        className="mt-3 inline-flex items-center gap-1.5 font-body text-sm font-semibold text-moss hover:underline"
+      >
+        Prova styrelsens adminpanel
+        <span aria-hidden="true">→</span>
+      </a>
     </aside>
   );
 }

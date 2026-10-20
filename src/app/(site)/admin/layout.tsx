@@ -1,6 +1,6 @@
 import { Container } from "@/components/ui";
 import { SubNav, type SubNavItem } from "@/components/layout/sub-nav";
-import { getSupportSession, requireAdmin } from "@/lib/auth";
+import { getSupportSession, isDemoAdminView, requireAdmin } from "@/lib/auth";
 import { formatDateTime } from "@/lib/utils";
 import { endSupportAction } from "./support/actions";
 
@@ -53,6 +53,7 @@ export default async function AdminLayout({
 }) {
   const user = await requireAdmin();
   const support = await getSupportSession();
+  const demo = await isDemoAdminView();
 
   return (
     // theme-admin återställer adminpanelens neutrala färger, kanter, skuggor och
@@ -74,6 +75,24 @@ export default async function AdminLayout({
                 Avsluta supportläge
               </button>
             </form>
+          </Container>
+        </div>
+      ) : null}
+
+      {/* Demons visningsläge: tydligt att inget sparas, och en väg tillbaka. */}
+      {demo ? (
+        <div className="border-b border-brand-200 bg-brand-50">
+          <Container className="flex flex-wrap items-center justify-between gap-3 py-3">
+            <p className="text-sm text-brand-900">
+              <strong>Visningsläge.</strong> Så här ser styrelsens adminpanel ut.
+              Klicka runt fritt – ändringar sparas inte.
+            </p>
+            <a
+              href="/admin/demo?avsluta"
+              className="rounded-lg border border-brand-300 bg-white px-3 py-1.5 text-sm font-medium text-brand-900 hover:bg-brand-100"
+            >
+              Tillbaka till hemsidan
+            </a>
           </Container>
         </div>
       ) : null}

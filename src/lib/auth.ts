@@ -21,6 +21,12 @@ import {
   type ActiveSupportSession,
 } from "@/lib/data/support";
 import { markSupportRequest } from "@/lib/support-log";
+import {
+  DemoReadOnlyError,
+  hasDemoAdminCookie,
+  isServerAction,
+  markDemoRequest,
+} from "@/lib/demo-admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 /** Inloggad användare (Supabase-session + Member-profil). Null om utloggad. */
@@ -104,8 +110,38 @@ export async function requireAdmin(): Promise<CurrentUser> {
     return supportUser(support);
   }
 
+  // Demons visningsläge (src/lib/demo-admin.ts): adminpanelen går att se,
+  // men varje försök att spara stoppas här – innan actionen gjort något.
+  if (await hasDemoAdminCookie()) {
+    if (await isServerAction()) throw new DemoReadOnlyError();
+    markDemoRequest();
+    return DEMO_USER;
+  }
+
   if (!user) redirect("/logga-in?next=/admin");
   redirect("/medlem");
+}
+
+/**
+ * Besökaren i demons visningsläge. Ingen Member-rad finns bakom och id:t är
+ * inget medlems-id – men det spelar ingen roll, eftersom inget sparas.
+ */
+const DEMO_USER: CurrentUser = {
+  id: "demo",
+  email: "",
+  fullName: "Demo – visningsläge",
+  apartment: "",
+  role: "admin",
+  status: "approved",
+  canManageListing: false,
+};
+
+/** Visas adminpanelen i demons visningsläge? (för bannern i adminlayouten) */
+export async function isDemoAdminView(): Promise<boolean> {
+  const user = await getCurrentUser();
+  if (user?.role === "admin" && user.status === "approved") return false;
+  if (await getSupportSession()) return false;
+  return hasDemoAdminCookie();
 }
 
 /**

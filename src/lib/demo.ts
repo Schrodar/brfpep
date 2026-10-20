@@ -11,6 +11,8 @@
  */
 
 export const DEMO_COOKIE = "demo_forening";
+/** Visningsläget för adminpanelen (se src/lib/demo-admin.ts). */
+export const DEMO_ADMIN_COOKIE = "demo_admin";
 export const DEMO_MAX_LANGD = 80;
 const SIGNATURLANGD = 32;
 
