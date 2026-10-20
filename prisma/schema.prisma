@@ -702,8 +702,12 @@ model DisplaySettings {
   association   Association @relation(fields: [associationId], references: [id], onDelete: Cascade)
 
   /// Visa de senaste nyheterna från sajten under anslagen.
-  showNews   Boolean @default(true)
+  showNews       Boolean @default(true)
   /// Svart skärm nattetid, "HH:MM". Lika värden = alltid på.
-  nightStart String  @default("23:00")
-  nightEnd   String  @default("06:00")
+  nightStart     String  @default("23:00")
+  nightEnd       String  @default("06:00")
+  /// Hur ofta skärmarna hämtar nytt innehåll, i minuter: 60 eller 1440 (en
+  /// gång om dagen). Glest med flit – skärmarna ska inte belasta servern,
+  /// och innehållet ändras sällan.
+  refreshMinutes Int     @default(1440)
 }
