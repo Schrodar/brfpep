@@ -1,6 +1,7 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import { isChunkLoadError, reloadOnce } from "@/lib/chunk-reload";
 import { DEMO_ADMIN_COOKIE } from "@/lib/demo";
 import { Button, Card, CardBody } from "@/components/ui";
 
@@ -12,7 +13,13 @@ import { Button, Card, CardBody } from "@/components/ui";
  * I produktion når felets text aldrig webbläsaren, därför avgörs visningsläget
  * på cookien och inte på felet.
  */
-export default function AdminError({ reset }: { error: Error; reset: () => void }) {
+export default function AdminError({ error, reset }: { error: Error; reset: () => void }) {
+  // Versionsglapp efter en deploy (src/lib/chunk-reload.ts): ladda om i stället
+  // för att visa ett fel.
+  useEffect(() => {
+    if (isChunkLoadError(error)) reloadOnce();
+  }, [error]);
+
   const demo = useSyncExternalStore(
     () => () => {},
     () => document.cookie.split("; ").includes(`${DEMO_ADMIN_COOKIE}=1`),
