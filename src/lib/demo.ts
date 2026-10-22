@@ -20,6 +20,16 @@ export function demolageAktivt(): boolean {
   return process.env.DEMO_MODE === "true";
 }
 
+/**
+ * Föreningen så som demon visar den. I demoläget används inte kortnamnet, så att
+ * sidhuvud, meny, sidfot och fliktitel säger samma namn ("Brf Pep", inte "Brf pep").
+ * Namnet från en personlig demolänk byts sedan in i webbläsaren: se DemoNamn och
+ * DemoTitel i src/components/demo/.
+ */
+export function somDemon<T extends { shortName: string }>(association: T): T {
+  return demolageAktivt() ? { ...association, shortName: "" } : association;
+}
+
 /** Namnet visas bara som text: utan kontrolltecken, på en rad och med begränsad längd. */
 export function stadaNamn(namn: string): string {
   return namn

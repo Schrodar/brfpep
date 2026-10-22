@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { siteConfig } from "@/config/siteConfig";
 import { EmailLink } from "@/components/association";
+import { DemoNamn } from "@/components/demo/demo-namn";
 import { getAssociationProfile } from "@/lib/data";
 import { Container, PageIntro, Section } from "@/components/ui";
 
@@ -19,7 +20,7 @@ export default async function PrivacyPage() {
 
         <div className="prose prose-editorial mt-12 text-foreground">
           <p>
-            {association.name}
+            <DemoNamn namn={association.name} />
             {association.organizationNumber
               ? ` (org.nr ${association.organizationNumber})`
               : ""}{" "}
@@ -29,7 +30,7 @@ export default async function PrivacyPage() {
 
           <h2>Personuppgiftsansvarig</h2>
           <p>
-            Styrelsen för {association.name} är personuppgiftsansvarig.{" "}
+            Styrelsen för <DemoNamn namn={association.name} /> är personuppgiftsansvarig.{" "}
             {association.contactEmail ? (
               <>
                 Du når oss på <EmailLink email={association.contactEmail} />.

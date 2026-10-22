@@ -3,7 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAssociationProfile, getListingById } from "@/lib/data";
+import { somDemon } from "@/lib/demo";
 import { shortNameOf } from "@/lib/utils";
+import { DemoNamn } from "@/components/demo/demo-namn";
 import { Card, CardBody, Container, Section } from "@/components/ui";
 import { Prose } from "@/components/prose";
 
@@ -218,7 +220,7 @@ export default async function ListingPage({ params }: Props) {
               <Link href="/for-maklare" className="link-inline">
                 föreningsfakta för köpare
               </Link>{" "}
-              eller kontakta {shortNameOf(association)}.
+              eller kontakta <DemoNamn namn={shortNameOf(somDemon(association))} />.
             </p>
           </aside>
         </div>

@@ -8,6 +8,7 @@ import {
   getSiteContent,
 } from "@/lib/data";
 import { publishedFigures } from "@/lib/key-figures";
+import { DemoNamn } from "@/components/demo/demo-namn";
 import { KeyFiguresSummary } from "@/components/key-figures";
 import { Container, PageIntro, Section } from "@/components/ui";
 import { Prose } from "@/components/prose";
@@ -57,9 +58,7 @@ export default async function AboutPage() {
         <PageIntro
           eyebrow="Föreningen"
           title="Om föreningen"
-          description={[association.name, association.city]
-            .filter(Boolean)
-            .join(", ")}
+          description={<DemoNamn namn={association.name} ort={association.city} />}
         />
 
         <div className="mt-12 grid gap-12 lg:grid-cols-3">

@@ -1,4 +1,5 @@
 import type { Ref } from "react";
+import { DemoNamn } from "@/components/demo/demo-namn";
 import { activeNotices, type BoardData, type BoardNotice } from "@/lib/board";
 import { cn } from "@/lib/utils";
 
@@ -105,7 +106,7 @@ export function BoardView({
             {data.building?.name ?? "Välkommen"}
           </p>
           <h1 className="font-display mt-[0.9rem] text-[3.6rem] leading-[1.02] tracking-[-0.01em]">
-            {data.association.name}
+            <DemoNamn namn={data.association.name} />
           </h1>
           {address ? (
             <p className="mt-[0.8rem] text-[1.25rem] text-ink/60">{address}</p>

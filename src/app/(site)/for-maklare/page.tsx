@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getAssociationInfo, getAssociationProfile } from "@/lib/data";
 import { hasPropertyManager } from "@/lib/utils";
 import { EmailLink, PhoneLink } from "@/components/association";
+import { DemoNamn } from "@/components/demo/demo-namn";
 import { Card, CardBody, Container, PageIntro, Section } from "@/components/ui";
 
 export const metadata: Metadata = {
@@ -10,11 +11,22 @@ export const metadata: Metadata = {
     "Föreningsfakta för mäklare och spekulanter – ekonomi, avgifter, renoveringar och kontaktuppgifter.",
 };
 
-function FactRow({ label, value }: { label: string; value: string }) {
+function FactRow({
+  label,
+  value,
+  namn = false,
+}: {
+  label: string;
+  value: string;
+  /** Föreningens namn: byts mot namnet från en demolänk i demoläget. */
+  namn?: boolean;
+}) {
   return (
     <div className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
       <dt className="text-sm font-medium text-muted">{label}</dt>
-      <dd className="text-sm text-foreground sm:col-span-2">{value}</dd>
+      <dd className="text-sm text-foreground sm:col-span-2">
+        {namn ? <DemoNamn namn={value} /> : value}
+      </dd>
     </div>
   );
 }
@@ -29,8 +41,8 @@ export default async function BrokerPage() {
 
   // Ofyllda uppgifter visas inte. Tom sträng och 0 betyder "inte ifyllt" –
   // hellre en kort sida än ett påhittat byggår inför en spekulant.
-  const allFacts: { label: string; value: string }[] = [
-    { label: "Föreningens namn", value: association.name },
+  const allFacts: { label: string; value: string; namn?: boolean }[] = [
+    { label: "Föreningens namn", value: association.name, namn: true },
     {
       label: "Organisationsnummer",
       value: association.organizationNumber,

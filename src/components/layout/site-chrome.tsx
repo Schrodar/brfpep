@@ -1,20 +1,22 @@
 import { DemoBanderoll } from "@/components/demo/demo-banderoll";
+import { DemoTitel } from "@/components/demo/demo-titel";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { TransitionProvider } from "@/components/page-transition/TransitionProvider";
 import { PageTransition } from "@/components/page-transition/PageTransition";
 import { getAssociationProfile, getSiteContent } from "@/lib/data";
-import { demolageAktivt } from "@/lib/demo";
+import { demolageAktivt, somDemon } from "@/lib/demo";
 
 /**
  * Header, innehåll och footer. Används av (site)/layout.tsx och av 404-sidan,
  * som ligger i roten och därför inte får sajtens layout på köpet.
  */
 export async function SiteChrome({ children }: { children: React.ReactNode }) {
-  const [siteContent, association] = await Promise.all([
+  const [siteContent, profile] = await Promise.all([
     getSiteContent(),
     getAssociationProfile(),
   ]);
+  const association = somDemon(profile);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -38,6 +40,7 @@ export async function SiteChrome({ children }: { children: React.ReactNode }) {
         <SiteFooter association={association} demo={demolageAktivt()} />
         {/* Syns bara när demon öppnats via en personlig demolänk (demoläget). */}
         <DemoBanderoll />
+        {demolageAktivt() ? <DemoTitel namn={association.name} /> : null}
       </TransitionProvider>
     </div>
   );

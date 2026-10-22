@@ -14,6 +14,7 @@ import { TransitionLink } from "@/components/page-transition/TransitionLink";
 import { navGroups } from "@/config/site";
 import { siteConfig } from "@/config/siteConfig";
 import { AddressDetails, AssociationLogo } from "@/components/association";
+import { DemoNamn } from "@/components/demo/demo-namn";
 import type { AssociationProfile } from "@/lib/types";
 import type { SessionMember } from "@/lib/use-current-member";
 import { cn, shortNameOf } from "@/lib/utils";
@@ -259,7 +260,7 @@ export function NavDrawer({
             <div className="flex items-center gap-2.5">
               <AssociationLogo size={34} alt="" />
               <span className="font-display text-lg font-medium text-ink">
-                {shortNameOf(association)}
+                <DemoNamn namn={shortNameOf(association)} />
               </span>
             </div>
 

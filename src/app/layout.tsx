@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import { siteConfig } from "@/config/siteConfig";
 import { getAssociationProfile } from "@/lib/data";
-import { demolageAktivt } from "@/lib/demo";
+import { demolageAktivt, somDemon } from "@/lib/demo";
 import { shortNameOf } from "@/lib/utils";
 import { ChunkReloadGuard } from "@/components/chunk-reload-guard";
 import "./globals.css";
@@ -32,7 +32,7 @@ export const revalidate = 600;
 
 /** Titel och beskrivning byggs av föreningens uppgifter i databasen. */
 export async function generateMetadata(): Promise<Metadata> {
-  const association = await getAssociationProfile();
+  const association = somDemon(await getAssociationProfile());
   const place = association.city ? ` i ${association.city}` : "";
   return {
     metadataBase: new URL(siteConfig.seo.siteUrl),
