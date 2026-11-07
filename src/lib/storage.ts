@@ -103,7 +103,8 @@ export function getPublicUrl(bucket: string, path: string): string {
 
 /**
  * Kortlivad signerad URL (för privata planritningar). Null vid fel. I demon en
- * relativ adress till den statiska filen – routerna löser upp den mot sin egen.
+ * relativ adress till den statiska filen – routerna skickar den som relativ
+ * Location, eftersom request.url bakom proxyn är serverns egen adress.
  */
 export async function getSignedUrl(
   bucket: string,

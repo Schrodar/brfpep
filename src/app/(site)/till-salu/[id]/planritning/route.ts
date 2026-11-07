@@ -17,7 +17,7 @@ import { BUCKET_FLOORPLANS, getSignedUrl } from "@/lib/storage";
 export const dynamic = "force-dynamic";
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
@@ -30,6 +30,11 @@ export async function GET(
     return new NextResponse("Planritningen kunde inte hämtas", { status: 502 });
   }
 
-  // Relativ i demon (statiska filer), annars Supabase-adressen som den är.
-  return NextResponse.redirect(new URL(url, request.url));
+  // Demons filer (DEMO_FILER=statiska) har en relativ adress, som skickas som
+  // den är: bakom proxyn i Coolify är request.url serverns egen adress
+  // (0.0.0.0:3000), och en redirect dit når aldrig fram.
+  if (url.startsWith("/")) {
+    return new NextResponse(null, { status: 307, headers: { Location: url } });
+  }
+  return NextResponse.redirect(url);
 }
