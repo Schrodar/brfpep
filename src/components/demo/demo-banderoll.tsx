@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import { StartaVisningKnapp } from "@/components/demo/guidad-visning/starta-knapp";
 import { useDemoForening } from "@/components/demo/use-demo-forening";
 
 const STANGD = "demo-banderoll-stangd";
@@ -8,8 +9,9 @@ const STANGD = "demo-banderoll-stangd";
 /**
  * Diskret kort nere till höger när demon öppnats via en personlig demolänk.
  * Förklarar att det är en demo och kan stängas för resten av besöket.
+ * Med `guidadVisning` (demoläget) får kortet knappen som startar den guidade visningen.
  */
-export function DemoBanderoll() {
+export function DemoBanderoll({ guidadVisning = false }: { guidadVisning?: boolean }) {
   const namn = useDemoForening();
   const stangdTidigare = useSyncExternalStore(
     () => () => {},
@@ -28,6 +30,8 @@ export function DemoBanderoll() {
   return (
     <aside
       aria-label="Om den här demon"
+      // Göms medan den guidade visningen markerar något (se globals.css).
+      data-demo-banderoll
       // Mobil: överst under sidhuvudet, eftersom startsidans rubrik ligger längst ned.
       // Bredare skärmar: nere till höger.
       className="fixed inset-x-4 top-20 z-50 rounded-2xl border border-line bg-surface/95 p-4 text-ink shadow-xl backdrop-blur sm:inset-x-auto sm:top-auto sm:right-6 sm:bottom-6 sm:max-w-sm sm:p-5"
@@ -50,6 +54,11 @@ export function DemoBanderoll() {
         Det här är en demo av hur er förenings hemsida kan se ut. Klicka runt fritt – och svara på
         mejlet, så visar jag den gärna på ert nästa styrelsemöte.
       </p>
+      {guidadVisning ? (
+        <div className="mt-4">
+          <StartaVisningKnapp forening={namn} />
+        </div>
+      ) : null}
       {/* Vanlig länk, inte TransitionLink: adressen är en route som sätter
           visningslägets cookie och skickar vidare till adminpanelen. */}
       <a

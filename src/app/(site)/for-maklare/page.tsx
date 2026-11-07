@@ -70,7 +70,7 @@ export default async function BrokerPage() {
           description={`Här samlar vi den information mäklare och spekulanter oftast efterfrågar. För frågor om en specifik lägenhet, kontakta ${manager ? "föreningens förvaltare" : "styrelsen"}.`}
         />
 
-        <div className="mt-12 grid gap-8 lg:grid-cols-3">
+        <div data-tour="maklare-fakta" className="mt-12 grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <Card>
               <CardBody>

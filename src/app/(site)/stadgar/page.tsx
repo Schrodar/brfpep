@@ -29,7 +29,7 @@ export default async function StadgarPage() {
           description="Reglerna som gäller i föreningen – vad stadgarna säger och vad som gäller i vardagen."
         />
 
-        <div className="mt-12">
+        <div data-tour="stadgar-lista" className="mt-12">
           <GroupedDocumentList documents={documents} />
         </div>
 

@@ -75,10 +75,15 @@ export function SiteHeader({
     <header className="relative isolate flex min-h-svh overflow-hidden bg-brand-800 text-white">
       {/* Bakgrund (helskärm), vald i siteConfig.hero: film före bild. brand-800
           på headern syns tills den laddat – och hela tiden när ingen är vald. */}
+      {/* Bakgrundsfilmen är bara dekor: utan Bild-i-bild och utan träffyta. Annars
+          lägger Firefox sin Bild-i-bild-knapp vid filmens högra kant, och den fångar
+          klick även genom element ovanpå – som demobanderollens stängknapp. */}
       {hero.video ? (
         <video
           aria-hidden="true"
-          className="absolute inset-0 h-full w-full object-cover"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+          disablePictureInPicture
+          disableRemotePlayback
           src={hero.video}
           poster={hero.image}
           autoPlay

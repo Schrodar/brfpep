@@ -41,3 +41,7 @@ next-env.d.ts
 # repot – en komprimerad version (2,5 MB) som följer med i bygget.
 /public/videos/*
 !/public/videos/hero.mp4
+
+# Demons fixtur (npm run demo:export). Repot är publikt och filen innehåller namn,
+# så den stannar lokalt – spara en säkerhetskopia av demo/data.json.
+/demo/

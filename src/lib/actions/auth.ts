@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getMemberByEmail, registerMember } from "@/lib/data";
+import { demolageAktivt } from "@/lib/demo";
 import { safeNextPath } from "@/lib/utils";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -78,6 +79,9 @@ export async function registerAction(
   _prev: AuthState,
   formData: FormData,
 ): Promise<AuthState> {
+  // Demon har inga inloggningskonton (egen databas, inget Supabase Auth).
+  if (demolageAktivt()) return { error: "Det här är en demo – här skapas inga konton." };
+
   const parsed = registerSchema.safeParse({
     fullName: formData.get("fullName"),
     email: formData.get("email"),

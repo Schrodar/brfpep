@@ -102,7 +102,7 @@ export default async function HomePage() {
 
       {/* Senaste nyheter */}
       <Section>
-        <Container>
+        <Container data-tour="senaste-nytt">
           <SectionHeading
             eyebrow="Aktuellt"
             title="Senaste nytt"

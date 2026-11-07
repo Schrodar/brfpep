@@ -1,7 +1,9 @@
 > **BRF-sajt för Brf Pep** – kopia av [BrfStart](https://github.com/Schrodar/BrfStart), publiceras
-> med Coolify på egen VPS (HostUp) och `ASSOCIATION_SLUG=brf-pep` – se [Drift](#drift-coolify-på-egen-vps). Databasschemat ägs av BrfStart: kör aldrig
-> `prisma db push` eller `prisma migrate` härifrån, eftersom databasen delas med alla
-> föreningar. Därför saknas db-skripten i `package.json`.
+> med Coolify på egen VPS (HostUp) och `ASSOCIATION_SLUG=brf-pep` – se [Drift](#drift-coolify-på-egen-vps).
+> Brf Pep är demon och har en **egen databas** (Postgres i Coolify), se
+> [Demons databas](#demons-databas). Schemat ägs ändå av BrfStart: kör aldrig
+> `prisma db push` eller `prisma migrate` mot den delade Supabase-databasen härifrån –
+> bara `npm run demo:db:push`, som vägrar köra mot Supabase.
 
 # Generisk BRF-sida
 
@@ -148,6 +150,40 @@ localhost → Advanced → Concurrent builds = 1). Dockerfilen sätter ett minne
 för bygget; sätt gärna även ett minnestak per container (ca 350 MB) under
 applikationens *Resource Limits*.
 
+### Demons databas
+
+Brf Pep (demon) läser inte kundernas delade Supabase-databas. Den har en egen liten
+Postgres i Coolify, fylld från fixturen `demo/data.json`, och PDF:erna ligger som
+statiska filer i `public/demofiler/`. Demon behöver varken Supabase Auth ("Logga in"
+öppnar visningsläget) eller Supabase Storage.
+
+| Variabel (demon) | Vid bygget | Vid körning |
+|---|:---:|:---:|
+| `DATABASE_URL` – demons Postgres (intern adress i Coolify) | ✓ | ✓ |
+| `DEMO_FILER=statiska` – filerna från `public/demofiler/` | ✓ | ✓ |
+| `NEXT_PUBLIC_SUPABASE_URL`, `…_ANON_KEY` – bara för att bygga inloggningsklienten | ✓ | ✓ |
+
+`SUPABASE_SERVICE_ROLE_KEY` och `DIRECT_URL` behövs inte i demon. Kommer bygget inte
+åt databasens interna adress, använd den publicerade porten för bygget och håll
+porten stängd utåt i brandväggen.
+
+**Skripten** (`scripts/demo-*.ts`):
+
+- `npm run demo:export` läser demoföreningen ur den delade databasen
+  (`DELAD_DATABASE_URL`) till `demo/data.json` och `public/demofiler/`. E-post till
+  medlemmar, inbjudna och felanmälare byts mot `…@brfpep.example`. `demo/` ligger i
+  `.gitignore` – repot är publikt och fixturen innehåller namn – så spara en
+  säkerhetskopia av den. Filerna i `public/demofiler/` committas, de behövs i bygget.
+- `npm run demo:db:push` lägger schemat i demodatabasen (`DATABASE_URL`). Kör det
+  efter varje schemaändring som förs över från BrfStart.
+- `npm run demo:import` fyller en tom demodatabas från fixturen.
+  `npm run demo:import -- --aterstall` ersätter demons rader, så att demon blir som
+  i fixturen igen.
+
+Push och import vägrar köra om `DATABASE_URL` pekar på Supabase, så att kundernas
+databas aldrig kan skrivas över. Demodata (till exempel leverantörer och möten) läggs
+in i fixturen eller direkt i demodatabasen – aldrig i den delade databasen.
+
 ## Demoläge (säljdemo)
 
 Brf Pep är en demoförening. Med `DEMO_MODE=true` blir sajten en personlig demo för
@@ -191,8 +227,29 @@ tenant-klienten vägrar dessutom alla skrivningar under en sådan request. Besö
 beskedet "Det här är en demo" (`admin/error.tsx`). `/admin/demo?avsluta` tar bort cookien.
 Se `src/lib/demo-admin.ts`. Utan `DEMO_MODE` svarar `/admin/demo` 404.
 
+**Guidad visning:** besökaren får en välkomstruta med en kapitelindelad rundtur
+(`src/components/demo/guidad-visning/`) – även utan `DEMO_MODE`. Rundturen har sex kapitel:
+de fem första visar vad hemsidan ger föreningen, det sista presenterar tillval (trapphustavlor,
+märkt "Tillval"). Adminsidorna visas i
+adminpanelens visningsläge, som bara finns i demoläget, så utan `DEMO_MODE` hoppar
+visningen över dem. Demokortets knapp "Starta guidad visning"
+startar den (eller fortsätter där besökaren var), och knappen nere till vänster öppnar
+kapitelmenyn. Kapitel och texter redigeras i
+`kapitel.ts`; markerade element pekas ut med `data-tour="…"` på sidorna. Framsteget sparas
+i webbläsaren (localStorage), separat per personlig demo.
+
+**Kontaktformuläret i avslutningen** ("Kontakta oss") mejlar via Resend
+(`src/app/api/demo-kontakt/route.ts`) till `DEMO_KONTAKT_EPOST`, annars info@byjnm.se.
+Sätt `RESEND_API_KEY` och `DEMO_KONTAKT_FRAN` – en avsändaradress på en domän som är
+verifierad i Resend, t.ex. demo@byjnm.se. Resend skickar bara från verifierade domäner,
+så föreningens namn står som avsändarnamn och besökarens adress som svarsadress: ett svar
+går direkt till föreningen. Föreningens namn fylls i från den personliga demolänken.
+Utan nyckel skickas inget, och formuläret hänvisar till mejladressen. Tacket visas bara
+när Resend svarar 200; vid utveckling (`npm run dev`) visar formuläret Resends felsvar. Lokalt syns visningen även med `npm run dev`; adminsidorna kräver
+konfigurationen `dev-demo` i `.claude/launch.json` (DEMO_MODE=true på port 3010).
+
 Demoläget ändrar inget i databasen eller schemat, och utan `DEMO_MODE` beter sig sajten
-exakt som förut.
+som förut – bortsett från den guidade visningen.
 
 ## Funktioner
 
@@ -246,7 +303,10 @@ exakt som förut.
 > (brfdosa, brfpep) skiljer sig `README.md` (rubriken), `package.json` (namn,
 > inga db-skript), `prisma/schema.prisma` (varningen), `src/config/siteConfig.ts`
 > (heron), `public/images/hero*.webp`, `public/videos/hero.mp4` och `.gitignore`
-> (filmen). För över allt annat som det är.
+> (filmen). För över allt annat som det är. I brfpep dessutom demons databas:
+> `package.json` (skripten `demo:*`), `scripts/demo-*.ts`, `demo/`,
+> `public/demofiler/` och `DEMO_FILER` i `src/lib/storage.ts` – för in BrfStarts
+> ändringar i de filerna för hand.
 5. **Startinnehåll:** ändra innehållet direkt i adminpanelen, eller redigera
    seed-datan i [`prisma/seed.ts`](prisma/seed.ts) och kör om `npm run db:seed`.
 

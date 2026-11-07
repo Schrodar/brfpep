@@ -35,7 +35,7 @@ export default async function EkonomiPage() {
           description="Nyckeltal, avgiftsnivå, vad som ingår och planerat underhåll."
         />
 
-        <div className="mt-12 max-w-2xl space-y-8">
+        <div data-tour="ekonomi" className="mt-12 max-w-2xl space-y-8">
           <KeyFiguresCard figures={figures} fiscalYear={economy.fiscalYear} />
 
           {blocks.length === 0 && figures.length === 0 ? (

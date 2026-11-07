@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { Card, CardBody, Container, Section } from "@/components/ui";
+import { demolageAktivt } from "@/lib/demo";
 import { RegisterForm } from "./register-form";
 
 export const metadata: Metadata = {
@@ -7,6 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function RegisterPage() {
+  // Demon har inga inloggningskonton (egen databas, inget Supabase Auth).
+  if (demolageAktivt()) redirect("/");
+
   return (
     <Section>
       <Container className="max-w-md">

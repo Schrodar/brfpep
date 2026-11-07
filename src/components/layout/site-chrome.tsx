@@ -1,5 +1,6 @@
 import { DemoBanderoll } from "@/components/demo/demo-banderoll";
 import { DemoTitel } from "@/components/demo/demo-titel";
+import { GuidadVisning } from "@/components/demo/guidad-visning/guidad-visning";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { TransitionProvider } from "@/components/page-transition/TransitionProvider";
@@ -39,8 +40,11 @@ export async function SiteChrome({ children }: { children: React.ReactNode }) {
 
         <SiteFooter association={association} demo={demolageAktivt()} />
         {/* Syns bara när demon öppnats via en personlig demolänk (demoläget). */}
-        <DemoBanderoll />
+        <DemoBanderoll guidadVisning={demolageAktivt()} />
         {demolageAktivt() ? <DemoTitel namn={association.name} /> : null}
+        {/* Guidad visning – även utan DEMO_MODE, men aldrig på föreningarnas riktiga
+            hemsidor. Adminsidorna tas bara med i demoläget (visningsläget kräver det). */}
+        <GuidadVisning demo={demolageAktivt()} kontaktEpost={process.env.DEMO_KONTAKT_EPOST || undefined} />
       </TransitionProvider>
     </div>
   );

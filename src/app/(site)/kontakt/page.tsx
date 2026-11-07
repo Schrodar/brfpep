@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { siteConfig } from "@/config/siteConfig";
 import { EmailLink, EmergencyContact, PhoneLink } from "@/components/association";
+import { DemoLeverantorer } from "@/components/demo/demo-leverantorer";
 import { getAssociationProfile, getMaintenanceSettings } from "@/lib/data";
 import { hasPropertyManager, listText } from "@/lib/utils";
 import { Card, CardBody, Container, PageIntro, Section } from "@/components/ui";
@@ -27,6 +28,7 @@ export default async function ContactPage() {
   const manager = hasPropertyManager(association);
   const contacts = listText([
     "styrelsen",
+    "föreningens leverantörer",
     manager ? "förvaltaren" : "",
     settings.caretakerPhone ? "fastighetsskötaren" : "",
   ]);
@@ -36,52 +38,57 @@ export default async function ContactPage() {
       <Container>
         <PageIntro eyebrow="För boende" title="Kontakt" description={`Så här når du ${contacts}.`} />
 
-        <div className="mt-12 grid gap-8 md:grid-cols-2">
-          <Card>
-            <CardBody>
-              <h2 className="title-card">Styrelsen</h2>
-              <p className="mt-2 text-sm text-muted">
-                Skriv till styrelsen via e-post, eller lämna en lapp i
-                föreningens brevlåda i entrén.
-              </p>
-              <ul className="mt-4 space-y-2 text-sm">
-                {association.contactEmail ? (
-                  <li>
-                    <span className="text-muted">E-post: </span>
-                    <EmailLink
-                      email={association.contactEmail}
-                      className="link-inline"
-                    />
-                  </li>
-                ) : null}
-                {association.contactPhone ? (
-                  <li>
-                    <span className="text-muted">Telefon: </span>
-                    <PhoneLink
-                      phone={association.contactPhone}
-                      className="link-inline"
-                    />
-                  </li>
-                ) : null}
-                {address ? (
-                  <li>
-                    <span className="text-muted">Adress: </span>
-                    {address}
-                  </li>
-                ) : null}
-              </ul>
-              <p className="mt-4 text-sm text-muted">
-                Gäller det ett fel i fastigheten? Använd{" "}
-                <Link
-                  href={siteConfig.links.faultReport}
-                  className="link-inline"
-                >
-                  felanmälan
-                </Link>
-                .
-              </p>
-            </CardBody>
-          </Card>
+        <div className="mt-12 grid items-start gap-8 md:grid-cols-2">
+          {/* Demosajten: leverantörerna under styrelsen, och båda rutorna
+              markeras tillsammans i den guidade visningen. */}
+          <div data-tour="kontakt-kort" className="grid gap-8">
+            <Card>
+              <CardBody>
+                <h2 className="title-card">Styrelsen</h2>
+                <p className="mt-2 text-sm text-muted">
+                  Skriv till styrelsen via e-post, eller lämna en lapp i
+                  föreningens brevlåda i entrén.
+                </p>
+                <ul className="mt-4 space-y-2 text-sm">
+                  {association.contactEmail ? (
+                    <li>
+                      <span className="text-muted">E-post: </span>
+                      <EmailLink
+                        email={association.contactEmail}
+                        className="link-inline"
+                      />
+                    </li>
+                  ) : null}
+                  {association.contactPhone ? (
+                    <li>
+                      <span className="text-muted">Telefon: </span>
+                      <PhoneLink
+                        phone={association.contactPhone}
+                        className="link-inline"
+                      />
+                    </li>
+                  ) : null}
+                  {address ? (
+                    <li>
+                      <span className="text-muted">Adress: </span>
+                      {address}
+                    </li>
+                  ) : null}
+                </ul>
+                <p className="mt-4 text-sm text-muted">
+                  Gäller det ett fel i fastigheten? Använd{" "}
+                  <Link
+                    href={siteConfig.links.faultReport}
+                    className="link-inline"
+                  >
+                    felanmälan
+                  </Link>
+                  .
+                </p>
+              </CardBody>
+            </Card>
+            <DemoLeverantorer />
+          </div>
 
           {manager ? (
             <Card>

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { getActivation, redeemInvitation } from "@/lib/data";
+import { demolageAktivt } from "@/lib/demo";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export interface ActivateState {
@@ -41,6 +42,9 @@ export async function activateAction(
   _prev: ActivateState,
   formData: FormData,
 ): Promise<ActivateState> {
+  // Demon har inga inloggningskonton (egen databas, inget Supabase Auth).
+  if (demolageAktivt()) return { error: "Det här är en demo – här skapas inga konton." };
+
   const base = baseSchema.safeParse({
     token: formData.get("token"),
     fullName: formData.get("fullName"),

@@ -2,3 +2,10 @@
 *.sh text eol=lf
 # Byggs på Linux (Coolify) – samma skäl.
 Dockerfile text eol=lf
+# Filer som aldrig får radslut ändrade (demons PDF:er och bilder i public/demofiler).
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.mp4 binary

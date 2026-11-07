@@ -49,7 +49,7 @@ export default async function ArsredovisningarPage() {
           description="Föreningens årsredovisningar samlade på ett ställe. Här ser mäklare och spekulanter föreningens ekonomi över tid."
         />
 
-        <div className="mt-12">
+        <div data-tour="arsredovisningar-lista" className="mt-12">
           <DocumentList documents={documents} showCategory={false} />
         </div>
 

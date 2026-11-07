@@ -426,3 +426,126 @@ body {
 .board-fade {
   animation: board-fade 1.2s ease-out both;
 }
+
+/* Guidad visning i demoläget (src/components/demo/guidad-visning/): rutor som
+   glider in, markeringen som andas och bocken som ritas när ett kapitel är klart. */
+@keyframes visning-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes visning-tona {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes visning-bock {
+  from {
+    stroke-dashoffset: 16;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes visning-andas {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.012);
+  }
+}
+.visning-in {
+  animation: visning-in 460ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.visning-tona {
+  animation: visning-tona 300ms ease-out both;
+}
+.visning-bock {
+  stroke-dasharray: 16;
+  animation: visning-bock 520ms 180ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+.visning-andas {
+  animation: visning-andas 2.6s ease-in-out infinite;
+}
+/* Menysteget (pekare.tsx): muspekaren glider fram och trycker på ⋯. Trycket ligger
+   på 64–76 % av 900 ms – i takt med PEKAREN_KLICKAR_MS i guidad-visning.tsx. */
+@keyframes visning-pekare {
+  0% {
+    opacity: 0;
+    transform: translate(-80px, 90px);
+  }
+  14% {
+    opacity: 1;
+  }
+  64% {
+    transform: translate(0, 0) scale(1);
+  }
+  76% {
+    transform: translate(0, 0) scale(0.84);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+}
+@keyframes visning-klick {
+  0% {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+.visning-pekare {
+  transform-origin: 4px 3px;
+  animation: visning-pekare 900ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+.visning-klick {
+  animation: visning-klick 560ms ease-out 600ms both;
+}
+.visning-etikett {
+  animation: visning-in 420ms cubic-bezier(0.22, 0.61, 0.36, 1) 320ms both;
+}
+/* Steg som visar startsidan från toppen låser rullningen. Ett attribut i stället
+   för inline-stil, eftersom sidomenyn låser och återställer med inline-stil. */
+html[data-visning-las] {
+  overflow: hidden;
+}
+[data-demo-banderoll] {
+  transition: opacity 300ms ease-out, visibility 300ms;
+}
+html[data-guidad-visning] [data-demo-banderoll] {
+  opacity: 0;
+  visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .visning-in,
+  .visning-tona,
+  .visning-bock,
+  .visning-andas,
+  .visning-pekare,
+  .visning-etikett {
+    animation: none;
+  }
+  .visning-klick {
+    animation: none;
+    opacity: 0;
+  }
+}

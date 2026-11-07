@@ -1,9 +1,13 @@
 // ⚠ KOPIA – schemat ägs av BrfStart (github.com/Schrodar/BrfStart).
 //
-// Kör ALDRIG prisma db push eller prisma migrate härifrån: databasen delas
-// med alla föreningar, och ett äldre schema kan radera kolumner där. Ändringar
-// görs i BrfStart och förs sedan över hit. Därför saknas db-skripten i
-// package.json.
+// Kör ALDRIG prisma db push eller prisma migrate härifrån mot den delade
+// Supabase-databasen: den delas med alla föreningar, och ett äldre schema kan
+// radera kolumner där. Ändringar görs i BrfStart och förs sedan över hit.
+//
+// Demon (Brf Pep) har en egen databas (Postgres i Coolify, se README "Demons
+// databas"). Lägg in schemaändringar där med `npm run demo:db:push`, som
+// vägrar köra om DATABASE_URL pekar på Supabase. Demodatabasen har ingen
+// pooler: url och directUrl är samma adress.
 
 // Datamodell för generisk BRF-sida (multi-tenant).
 //

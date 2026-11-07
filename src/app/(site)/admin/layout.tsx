@@ -110,7 +110,7 @@ export default async function AdminLayout({
           </div>
         </Container>
       </div>
-      <Container className="py-8">{children}</Container>
+      <Container data-tour="admin-innehall" className="py-8">{children}</Container>
     </div>
   );
 }

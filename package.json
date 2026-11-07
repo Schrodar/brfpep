@@ -17,7 +17,10 @@
     "users:prune": "tsx scripts/delete-orphan-users.ts",
     "storage:setup": "tsx scripts/setup-storage.ts",
     "maintenance:number": "tsx scripts/number-maintenance-requests.ts",
-    "contacts:migrate": "tsx scripts/migrate-contacts.ts"
+    "contacts:migrate": "tsx scripts/migrate-contacts.ts",
+    "demo:export": "tsx scripts/demo-export.ts",
+    "demo:db:push": "tsx scripts/demo-db-push.ts",
+    "demo:import": "tsx scripts/demo-import.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

@@ -15,7 +15,20 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
  * Alla operationer går via service role-klienten (server only), utom
  * getPublicUrl som bara bygger en adress. Behörighet kontrolleras i respektive
  * server action innan dessa anropas.
+ *
+ * Demon (DEMO_FILER=statiska) använder inte Supabase Storage: filerna ligger
+ * som statiska filer i public/demofiler/<bucket>/<sökväg> (npm run demo:export),
+ * och inget laddas upp eller tas bort.
  */
+
+/** Demons filer ligger i public/demofiler i stället för i Supabase Storage. */
+function statiskaFiler(): boolean {
+  return process.env.DEMO_FILER === "statiska";
+}
+
+function statiskAdress(bucket: string, path: string): string {
+  return `/demofiler/${bucket}/${path}`;
+}
 
 export const BUCKET_PHOTOS = "apartment-photos";
 export const BUCKET_FLOORPLANS = "floor-plans";
@@ -55,6 +68,7 @@ export async function uploadFile(
   prefix: string,
   file: File,
 ): Promise<UploadResult> {
+  if (statiskaFiler()) return { ok: false, error: "Demon sparar inga filer." };
   const supabase = createSupabaseAdminClient();
   const path = `${prefix}/${crypto.randomUUID()}.${EXT[file.type] ?? "bin"}`;
   const bytes = await file.arrayBuffer();
@@ -68,7 +82,7 @@ export async function uploadFile(
 }
 
 export async function removeFile(bucket: string, path: string): Promise<void> {
-  if (!path) return;
+  if (!path || statiskaFiler()) return;
   const supabase = createSupabaseAdminClient();
   await supabase.storage.from(bucket).remove([path]);
 }
@@ -79,6 +93,7 @@ export async function removeFile(bucket: string, path: string): Promise<void> {
  * förrenderas vid bygget, och service role-nyckeln ska inte behövas där.
  */
 export function getPublicUrl(bucket: string, path: string): string {
+  if (statiskaFiler()) return statiskAdress(bucket, path);
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -86,12 +101,16 @@ export function getPublicUrl(bucket: string, path: string): string {
   return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
 }
 
-/** Kortlivad signerad URL (för privata planritningar). Null vid fel. */
+/**
+ * Kortlivad signerad URL (för privata planritningar). Null vid fel. I demon en
+ * relativ adress till den statiska filen – routerna löser upp den mot sin egen.
+ */
 export async function getSignedUrl(
   bucket: string,
   path: string,
   expiresIn = 3600,
 ): Promise<string | null> {
+  if (statiskaFiler()) return statiskAdress(bucket, path);
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase.storage
     .from(bucket)

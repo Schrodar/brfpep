@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { getActivation } from "@/lib/data";
+import { demolageAktivt } from "@/lib/demo";
 import { Card, CardBody, Container, Section } from "@/components/ui";
 import { ActivateForm } from "./activate-form";
 
@@ -19,6 +21,9 @@ export default async function ActivatePage({
 }: {
   searchParams: Promise<{ token?: string }>;
 }) {
+  // Demon har inga inloggningskonton (egen databas, inget Supabase Auth).
+  if (demolageAktivt()) redirect("/");
+
   const { token = "" } = await searchParams;
   const activation = await getActivation(token);
   const invitation = activation?.invitation;

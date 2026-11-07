@@ -56,7 +56,7 @@ export default async function AdminDashboard() {
     <div className="space-y-8">
       <StaleFiguresNotice figures={economy} showLink />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div data-tour="admin-oversikt" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
           label="Väntar på godkännande"
           value={pending.length}
