@@ -1,12 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { DEMO_LANK_COOKIE, lasLankbevis } from "@/lib/demo";
+import { noteraHandelse } from "@/lib/demo-handelser";
 import { byggKontaktmejl, DEMO_KONTAKT_STANDARD, demoKontaktSchema } from "@/lib/demo-kontakt";
 import { HONEYPOT_FIELD } from "@/lib/form";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Kontaktformuläret i den guidade visningens avslutning. Skickar ett mejl via
- * Resend till DEMO_KONTAKT_EPOST (annars info@byjnm.se):
+ * Kontaktformuläret i den guidade visningens avslutning. Sparar förfrågan i demons
+ * händelselogg, där webcrawlern hämtar den, och skickar ett mejl via Resend till
+ * DEMO_KONTAKT_EPOST (annars info@byjnm.se):
  *
  *   RESEND_API_KEY      nyckeln från Resend. Utan den svarar routen 503 och
  *                       formuläret hänvisar till mejladressen i stället.
@@ -54,7 +57,7 @@ function inomGransen(adress: string): boolean {
   return true;
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   // Bara från den egna sajten.
   const origin = request.headers.get("origin");
   const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host");
@@ -89,6 +92,16 @@ export async function POST(request: Request) {
   if (!inomGransen(adress)) {
     return svar(429, { fel: "Det har kommit många meddelanden på kort tid. Försök igen om en stund." });
   }
+
+  // Sparas i demons händelselogg innan mejlet skickas, så att webcrawlern ser förfrågan även
+  // om Resend inte svarar. Cookien demo_lank visar vilken förenings personliga länk besökaren
+  // kom från; utan den sparas förfrågan utan förening (se src/lib/demo-handelser.ts).
+  await noteraHandelse({
+    typ: "kontakt",
+    namn: tolkat.data.forening || null,
+    signatur: await lasLankbevis(request.cookies.get(DEMO_LANK_COOKIE)?.value, process.env.DEMO_LINK_SECRET ?? ""),
+    uppgifter: { ...tolkat.data },
+  });
 
   const nyckel = process.env.RESEND_API_KEY;
   if (!nyckel) {

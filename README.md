@@ -194,14 +194,33 @@ säljbreven som skickas från webcrawlern (JnM Creative studio).
 1. Säljbrevets knapp länkar till `https://<demo>/?f=<föreningens namn>&s=<signatur>`.
    Signaturen är HMAC-SHA256 (hex, de första 32 tecknen) av namnet, med hemligheten
    `DEMO_LINK_SECRET` – samma hemlighet som i webcrawlerns `.env`.
-2. Proxyn (`src/proxy.ts`, `src/lib/demo.ts`) kontrollerar signaturen på servern. Stämmer
-   den sätts cookien `demo_forening` (30 dagar), och besökaren skickas vidare till `/`
-   utan parametrar. En felaktig eller påhittad länk ger vanlig demo – ingen kan få sajten
-   att visa godtycklig text.
+2. Proxyn (`src/proxy.ts`) skriver om länken till routen `src/app/api/demo-lank`, som
+   kontrollerar signaturen på servern (`src/lib/demo.ts`). Stämmer den sätts cookien
+   `demo_forening` (30 dagar), öppningen noteras (se nedan) och besökaren skickas vidare
+   till `/` utan parametrar. En felaktig eller påhittad länk ger vanlig demo – ingen kan få
+   sajten att visa godtycklig text.
 3. Webbläsaren läser cookien (`useDemoForening`): startsidan hälsar "Välkommen till
    {förening}", namnet visas i sidhuvudet och ett diskret kort nere till höger förklarar
    att det är en demo. Sidorna förblir statiska.
 4. Med `DEMO_MODE` påslaget får sidorna `noindex`, så att demon inte syns i sökmotorer.
+
+**Vilka som tittat (händelseloggen):** demon noterar när en personlig länk öppnas och när
+kontaktformuläret skickas, så att webcrawlerns Kunder kan visa vilka föreningar som tittat
+och hur de nås (`src/lib/demo-handelser.ts`).
+
+- En öppning sparar föreningens namn, länkens signatur och tiden – ingen IP-adress,
+  webbläsare eller sidvisning. Kontaktformuläret sparar fälten och, via den httpOnly-cookien
+  `demo_lank` som länken sätter, vilken förenings länk besökaren kom från.
+- Länkskannare i mejlservrar, förhandsvisningar i chattappar och HEAD-förfrågningar märks
+  som robot och räknas inte som en förening som tittat. Länkar med `prov=1` – webcrawlerns
+  förhandsvisningar och testmejl – noteras inte alls.
+- Händelserna ligger i `jnm.demohandelser` i demons egen Postgres, i ett eget schema utanför
+  Prisma-schemat. Varken schemat från BrfStart, `demo:db:push` eller `demo:import` rör
+  tabellen, och den skapas första gången den behövs. Händelser äldre än ett år tas bort.
+- Svarar inte databasen väntar länken högst två sekunder och fungerar ändå.
+- Webcrawlern hämtar med `GET /api/demo-handelser?efter=<id>` och `Authorization: Bearer
+  <nyckel>`. Nyckeln härleds ur `DEMO_LINK_SECRET` (`apiNyckel`), så ingen ny hemlighet
+  behövs. Utan `DEMO_MODE` eller hemlighet svarar routen 404.
 
 **Miljövariabler i Coolify** (utöver tabellen ovan):
 

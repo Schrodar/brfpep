@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { DEMO_COOKIE, demolageAktivt, stadaNamn, verifieraDemolank } from "@/lib/demo";
+import { demolageAktivt } from "@/lib/demo";
 import { updateSession } from "@/lib/supabase/middleware";
 
 /**
@@ -14,32 +14,18 @@ export async function proxy(request: NextRequest) {
 }
 
 /**
- * Startsidan i demoläget (se src/lib/demo.ts): en signerad länk från säljbrevet sätter en
- * cookie med föreningens namn och skickas vidare till en ren adress. Allt annat passerar
- * direkt, utan att sessionen läses – startsidan är statisk och ska förbli det.
+ * Startsidan i demoläget (se src/lib/demo.ts): säljbrevets personliga länk (/?f=…&s=…)
+ * skrivs om till routen /api/demo-lank. Den kontrollerar signaturen, sätter cookien med
+ * föreningens namn, noterar öppningen i databasen och skickar vidare till en ren adress.
+ * Allt annat passerar direkt, utan att sessionen läses – startsidan är statisk och ska
+ * förbli det.
  */
-async function demolank(request: NextRequest) {
+function demolank(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-  const namn = searchParams.get("f");
-  const sig = searchParams.get("s");
-  if (!demolageAktivt() || namn === null || sig === null) return NextResponse.next();
-
-  const ren = request.nextUrl.clone();
-  ren.searchParams.delete("f");
-  ren.searchParams.delete("s");
-  const response = NextResponse.redirect(ren);
-  if (await verifieraDemolank(namn, sig, process.env.DEMO_LINK_SECRET ?? "")) {
-    // Next kodar själv värdet (encodeURIComponent); useDemoForening avkodar.
-    response.cookies.set(DEMO_COOKIE, stadaNamn(namn), {
-      path: "/",
-      sameSite: "lax",
-      secure: ren.protocol === "https:",
-      // Läses av webbläsaren (se useDemoForening), därför inte httpOnly.
-      httpOnly: false,
-      maxAge: 60 * 60 * 24 * 30,
-    });
-  }
-  return response;
+  if (!demolageAktivt() || !searchParams.has("f") || !searchParams.has("s")) return NextResponse.next();
+  const route = request.nextUrl.clone();
+  route.pathname = "/api/demo-lank";
+  return NextResponse.rewrite(route);
 }
 
 export const config = {
