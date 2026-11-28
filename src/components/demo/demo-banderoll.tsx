@@ -1,73 +1,110 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { StartaVisningKnapp } from "@/components/demo/guidad-visning/starta-knapp";
+import { usePathname } from "next/navigation";
+import { nyckelFor, useFramsteg } from "@/components/demo/guidad-visning/framsteg";
+import { kapitelFor } from "@/components/demo/guidad-visning/kapitel";
+import { BOKA_HANDELSE, StartaVisningKnapp } from "@/components/demo/guidad-visning/starta-knapp";
+import { knapp } from "@/components/demo/guidad-visning/ui";
 import { useDemoForening } from "@/components/demo/use-demo-forening";
+import { cn } from "@/lib/utils";
 
 const STANGD = "demo-banderoll-stangd";
 
+function stangdTidigare(): boolean {
+  try {
+    return sessionStorage.getItem(STANGD) === "1";
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Diskret kort nere till höger när demon öppnats via en personlig demolänk.
- * Förklarar att det är en demo och kan stängas för resten av besöket.
- * Med `guidadVisning` (demoläget) får kortet knappen som startar den guidade visningen.
+ * Demorutan för den som öppnat demon via en personlig demolänk: att det är en demo, och vägen
+ * vidare – boka en visning eller prova adminpanelen. Kan stängas för resten av besöket.
+ *
+ * Mobil: en låg list längst ned, så att startsidans rubrik och innehållet syns. Listen har
+ * knappen för den guidade visningen, och visningens egen knapp nere till vänster göms medan
+ * listen syns (globals.css). Bredare skärmar: ett kort nere till höger.
+ *
+ * Med `guidadVisning` (demoläget) visas rutan först när välkomstrutan är besvarad, så att
+ * ingen möts av två hälsningar på en gång. Den göms också medan visningen markerar något.
  */
 export function DemoBanderoll({ guidadVisning = false }: { guidadVisning?: boolean }) {
   const namn = useDemoForening();
-  const stangdTidigare = useSyncExternalStore(
-    () => () => {},
-    () => sessionStorage.getItem(STANGD) === "1",
-    () => false,
-  );
+  const pathname = usePathname();
+  const framsteg = useFramsteg(nyckelFor(namn), kapitelFor(guidadVisning));
+  const stangdForut = useSyncExternalStore(() => () => {}, stangdTidigare, () => false);
   const [stangd, setStangd] = useState(false);
 
-  if (!namn || stangd || stangdTidigare) return null;
+  if (!namn || stangd || stangdForut) return null;
+  if (guidadVisning && (!framsteg || framsteg.lage === "ny")) return null;
 
   const stang = () => {
-    sessionStorage.setItem(STANGD, "1");
+    try {
+      sessionStorage.setItem(STANGD, "1");
+    } catch {
+      // Utan sessionStorage stängs rutan bara för den här sidan.
+    }
     setStangd(true);
   };
+  const iAdmin = pathname.startsWith("/admin");
 
   return (
     <aside
       aria-label="Om den här demon"
       // Göms medan den guidade visningen markerar något (se globals.css).
       data-demo-banderoll
-      // Mobil: överst under sidhuvudet, eftersom startsidans rubrik ligger längst ned.
-      // Bredare skärmar: nere till höger.
-      className="fixed inset-x-4 top-20 z-50 rounded-2xl border border-line bg-surface/95 p-4 text-ink shadow-xl backdrop-blur sm:inset-x-auto sm:top-auto sm:right-6 sm:bottom-6 sm:max-w-sm sm:p-5"
+      className="fixed inset-x-3 bottom-3 z-50 rounded-2xl border border-line bg-surface/95 px-4 pb-3 pt-2.5 text-ink shadow-xl backdrop-blur sm:inset-x-auto sm:bottom-6 sm:right-6 sm:w-[22rem] sm:p-5"
     >
-      <div className="flex items-start justify-between gap-4">
-        <p className="font-body text-xs font-semibold uppercase tracking-[0.2em] text-moss">Demo</p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="flex min-w-0 items-baseline gap-2 font-body">
+          <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.2em] text-moss">Demo</span>
+          <span className="truncate text-sm font-semibold text-ink sm:hidden">{namn}</span>
+        </p>
         <button
           type="button"
           onClick={stang}
           aria-label="Stäng"
-          className="-mr-1 -mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-sand hover:text-ink"
+          className="-mr-2 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-sand hover:text-ink sm:-mt-1"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
             <path d="M6 6l12 12M18 6 6 18" />
           </svg>
         </button>
       </div>
-      <p className="mt-2 font-display text-xl leading-snug">Välkommen, {namn}</p>
-      <p className="mt-2 font-body text-sm leading-relaxed text-muted">
-        Det här är en demo av hur er förenings hemsida kan se ut. Klicka runt fritt – och svara på
-        mejlet, så visar jag den gärna på ert nästa styrelsemöte.
-      </p>
-      {guidadVisning ? (
-        <div className="mt-4">
-          <StartaVisningKnapp forening={namn} />
-        </div>
-      ) : null}
+
+      <div className="hidden sm:block">
+        <p className="mt-1 font-display text-xl leading-snug">Välkommen, {namn}</p>
+        <p className="mt-2 font-body text-sm leading-relaxed text-muted">
+          Så här kan er hemsida se ut. Klicka runt fritt – inget ni gör sparas.
+        </p>
+      </div>
+
+      <div className="mt-2 flex gap-2 sm:mt-4">
+        {guidadVisning ? (
+          <StartaVisningKnapp forening={namn} variant="sekundar" kort className="flex-1 sm:hidden" />
+        ) : null}
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new Event(BOKA_HANDELSE))}
+          className={cn(knapp.primar, "flex-1 px-4 sm:flex-none sm:px-5")}
+        >
+          Boka en visning
+        </button>
+      </div>
+
       {/* Vanlig länk, inte TransitionLink: adressen är en route som sätter
           visningslägets cookie och skickar vidare till adminpanelen. */}
-      <a
-        href="/admin/demo"
-        className="mt-3 inline-flex items-center gap-1.5 font-body text-sm font-semibold text-moss hover:underline"
-      >
-        Prova styrelsens adminpanel
-        <span aria-hidden="true">→</span>
-      </a>
+      {iAdmin ? null : (
+        <a
+          href="/admin/demo"
+          className="mt-3 hidden items-center gap-1.5 font-body text-sm font-semibold text-moss hover:underline sm:inline-flex"
+        >
+          Prova styrelsens adminpanel
+          <span aria-hidden="true">→</span>
+        </a>
+      )}
     </aside>
   );
 }

@@ -13,18 +13,21 @@ type Status =
   | { typ: "fel"; text: string; detalj?: string };
 
 /**
- * Kontaktformuläret i avslutningen. Skickas till /api/demo-kontakt, som mejlar
- * via Resend med föreningens namn som avsändare och besökarens adress som
- * svarsadress. Knapparna ligger fast i rutans nederkant, så att de alltid syns.
+ * Boka en visning: kontaktformuläret i avslutningen och från demorutan. Skickas till
+ * /api/demo-kontakt, som mejlar via Resend med föreningens namn som avsändare och
+ * besökarens adress som svarsadress. Med `telefon` (DEMO_KONTAKT_TELEFON) står också
+ * numret att ringa. Knapparna ligger fast i rutans nederkant, så att de alltid syns.
  */
 export function Kontaktformular({
   forening,
   kontaktEpost,
+  telefon,
   onTillbaka,
   onStang,
 }: {
   forening: string | null;
   kontaktEpost?: string;
+  telefon?: string;
   onTillbaka: () => void;
   onStang: () => void;
 }) {
@@ -88,12 +91,23 @@ export function Kontaktformular({
   return (
     <form onSubmit={skicka}>
       <div className="bg-bone/70 px-6 pb-5 pt-7 sm:px-9 sm:pt-8">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-moss">Kontakta oss</p>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-moss">Boka en visning</p>
         <p className="mt-2 font-display text-[1.6rem] font-normal leading-tight tracking-tight text-ink">
-          Se hemsidan för {forening ?? "er förening"}
+          Vi visar hemsidan för {forening ?? "er förening"}
         </p>
         <p className="mt-2 text-[15px] leading-relaxed text-muted">
-          Lämna era uppgifter så hör vi av oss – gärna för att visa hemsidan på ert nästa styrelsemöte.
+          Lämna era uppgifter, så hör vi av oss och bokar en tid – gärna på ert nästa styrelsemöte, på plats eller
+          via länk.
+          {telefon ? (
+            <>
+              {" "}
+              Ni kan också ringa{" "}
+              <a href={`tel:${telefon.replace(/[^\d+]/g, "")}`} className="whitespace-nowrap font-semibold text-moss hover:underline">
+                {telefon}
+              </a>
+              .
+            </>
+          ) : null}
         </p>
       </div>
 
@@ -128,7 +142,7 @@ export function Kontaktformular({
             rows={3}
             maxLength={2000}
             className="min-h-20"
-            placeholder="T.ex. när det passar att höras."
+            placeholder="T.ex. när ni har nästa styrelsemöte."
           />
         </Field>
         {status.typ === "fel" ? (

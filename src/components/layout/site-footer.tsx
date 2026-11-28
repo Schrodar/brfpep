@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { siteConfig } from "@/config/siteConfig";
 import { navGroups } from "@/config/site";
-import { AddressDetails, EmailLink, PhoneLink } from "@/components/association";
+import { EmailLink, PhoneLink } from "@/components/association";
+import { DemoAdress, DemoOrgnr } from "@/components/demo/demo-fakta";
 import { DemoNamn } from "@/components/demo/demo-namn";
 import type { AssociationProfile } from "@/lib/types";
 
@@ -30,15 +31,13 @@ export function SiteFooter({
           <p className="font-display text-xl font-normal tracking-tight text-ink">
             <DemoNamn namn={association.name} />
           </p>
-          <AddressDetails
+          <DemoAdress
             address={association}
             className="mt-4 text-sm leading-relaxed text-muted"
           />
-          {association.organizationNumber ? (
-            <p className="mt-3 text-sm text-muted">
-              Org.nr {association.organizationNumber}
-            </p>
-          ) : null}
+          <p className="mt-3 text-sm text-muted">
+            <DemoOrgnr orgnr={association.organizationNumber} fore="Org.nr " />
+          </p>
         </div>
 
         <div>

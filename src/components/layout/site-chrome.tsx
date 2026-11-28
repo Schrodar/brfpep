@@ -44,7 +44,11 @@ export async function SiteChrome({ children }: { children: React.ReactNode }) {
         {demolageAktivt() ? <DemoTitel namn={association.name} /> : null}
         {/* Guidad visning – även utan DEMO_MODE, men aldrig på föreningarnas riktiga
             hemsidor. Adminsidorna tas bara med i demoläget (visningsläget kräver det). */}
-        <GuidadVisning demo={demolageAktivt()} kontaktEpost={process.env.DEMO_KONTAKT_EPOST || undefined} />
+        <GuidadVisning
+          demo={demolageAktivt()}
+          kontaktEpost={process.env.DEMO_KONTAKT_EPOST || undefined}
+          kontaktTelefon={process.env.DEMO_KONTAKT_TELEFON || undefined}
+        />
       </TransitionProvider>
     </div>
   );

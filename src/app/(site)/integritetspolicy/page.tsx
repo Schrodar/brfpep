@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { siteConfig } from "@/config/siteConfig";
 import { EmailLink } from "@/components/association";
+import { DemoOrgnr } from "@/components/demo/demo-fakta";
 import { DemoNamn } from "@/components/demo/demo-namn";
 import { getAssociationProfile } from "@/lib/data";
 import { Container, PageIntro, Section } from "@/components/ui";
@@ -22,7 +23,7 @@ export default async function PrivacyPage() {
           <p>
             <DemoNamn namn={association.name} />
             {association.organizationNumber
-              ? ` (org.nr ${association.organizationNumber})`
+              ? <DemoOrgnr orgnr={association.organizationNumber} fore=" (org.nr " efter=")" />
               : ""}{" "}
             värnar om din personliga integritet. Här beskrivs hur vi behandlar
             personuppgifter enligt dataskyddsförordningen (GDPR).

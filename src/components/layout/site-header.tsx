@@ -9,7 +9,7 @@ import { TransitionLink } from "@/components/page-transition/TransitionLink";
 import { NavDrawer } from "@/components/layout/nav-drawer";
 import { AdminButton, AuthButton } from "@/components/layout/auth-button";
 import { AssociationLogo } from "@/components/association";
-import { useDemoForening } from "@/components/demo/use-demo-forening";
+import { useDemoFakta, useDemoForening } from "@/components/demo/use-demo-forening";
 import { siteConfig } from "@/config/siteConfig";
 import type { AssociationProfile } from "@/lib/types";
 import { useCurrentMember } from "@/lib/use-current-member";
@@ -39,14 +39,18 @@ export function SiteHeader({
     member?.role === "admin" &&
     member.status === "approved";
   // Demoläget (src/lib/demo.ts): öppnad via en personlig demolänk visas föreningens eget
-  // namn, och demoföreningens ort och beskrivning byts mot en neutral text.
+  // namn och ort från länken, och demoföreningens beskrivning byts mot en neutral text.
+  // Demoföreningens texter märks med data-demo-standard, så att den som har en personlig
+  // länk inte ser dem medan sidan laddas (se demoSkript).
   const demoNamn = useDemoForening();
+  const fakta = useDemoFakta();
+  const standard = demoNamn ? undefined : "";
   const shortName = demoNamn ?? shortNameOf(association);
   const title = demoNamn ? `Välkommen till ${demoNamn}` : heroTitle;
   const subtitle = demoNamn
     ? "Så här kan er förenings hemsida se ut – med nyheter, dokument och felanmälan samlat på ett ställe."
     : heroSubtitle;
-  const city = demoNamn ? null : association.city;
+  const city = demoNamn ? (fakta?.ort ?? null) : association.city;
   const { hero } = siteConfig;
 
   if (!isHome) {
@@ -55,7 +59,7 @@ export function SiteHeader({
         <div className="mx-auto flex h-20 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:h-24 sm:px-6">
           <TransitionLink href="/" className="flex items-center gap-3">
             <AssociationLogo size={38} priority alt="" />
-            <span className="font-display text-lg font-normal tracking-tight text-ink sm:text-xl">
+            <span data-demo-standard={standard} className="font-display text-lg font-normal tracking-tight text-ink sm:text-xl">
               {shortName}
             </span>
           </TransitionLink>
@@ -103,7 +107,7 @@ export function SiteHeader({
         <div className="mx-auto flex h-20 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:h-24 sm:px-6">
           <TransitionLink href="/" className="flex items-center gap-2.5">
             <AssociationLogo size={40} priority light alt="" />
-            <span className="font-display text-lg font-medium text-white sm:text-xl">
+            <span data-demo-standard={standard} className="font-display text-lg font-medium text-white sm:text-xl">
               {shortName}
             </span>
           </TransitionLink>
@@ -118,10 +122,11 @@ export function SiteHeader({
       </div>
 
       {/* Hero-innehåll. Headern tar hela skärmens höjd. */}
-      <div className="relative z-10 mx-auto flex min-h-svh w-full max-w-6xl items-end px-4 pb-16 pt-32 sm:px-6 sm:pb-24 sm:pt-40 lg:pb-28">
+      <div data-hero-innehall="" className="relative z-10 mx-auto flex min-h-svh w-full max-w-6xl items-end px-4 pb-16 pt-32 sm:px-6 sm:pb-24 sm:pt-40 lg:pb-28">
         <div className="max-w-3xl">
           {city ? (
             <p
+              data-demo-standard={standard}
               className="hero-fade font-body text-sm font-semibold uppercase tracking-[0.2em] text-white/70"
               style={{ animationDelay: "1.5s" }}
             >
@@ -130,6 +135,7 @@ export function SiteHeader({
           ) : null}
 
           <h1
+            data-demo-standard={standard}
             className="hero-fade mt-4 max-w-[15ch] font-display text-4xl font-medium leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-7xl"
             style={{ animationDelay: "1.65s" }}
           >
@@ -138,6 +144,7 @@ export function SiteHeader({
 
           {subtitle ? (
             <p
+              data-demo-standard={standard}
               className="hero-fade mt-6 max-w-2xl font-body text-base leading-relaxed text-white/80 sm:text-xl"
               style={{ animationDelay: "1.85s" }}
             >

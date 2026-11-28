@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import { siteConfig } from "@/config/siteConfig";
 import { getAssociationProfile } from "@/lib/data";
-import { demolageAktivt, somDemon } from "@/lib/demo";
+import { demolageAktivt, demoSkript, somDemon } from "@/lib/demo";
 import { shortNameOf } from "@/lib/utils";
 import { ChunkReloadGuard } from "@/components/chunk-reload-guard";
 import "./globals.css";
@@ -52,11 +52,14 @@ export async function generateMetadata(): Promise<Metadata> {
  * Bara dokumentets skal. Sajtens header och footer ligger i (site)/layout.tsx,
  * så att trapphustavlan (/tavla) kan ta hela skärmen utan dem.
  */
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Demoläget: demoföreningens namn döljs för den som kommit via en personlig demolänk,
+  // redan innan sidan ritas (se demoSkript).
+  const demonamn = demolageAktivt() ? (await getAssociationProfile()).name : null;
   return (
     // suppressHydrationWarning: trapphustavlan sätter translate="no" på <html>
     // med ett skript innan React tar över (se tavla/layout.tsx). Gäller bara
@@ -67,6 +70,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="theme-site">
+        {demonamn !== null ? <script dangerouslySetInnerHTML={{ __html: demoSkript(demonamn) }} /> : null}
         {children}
         {/* Laddar om en flik som hamnat efter en ny deploy (src/lib/chunk-reload.ts). */}
         <ChunkReloadGuard />

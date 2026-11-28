@@ -5,8 +5,9 @@
  * Den guidade visningen finns bara på demosajten (Brf Pep), aldrig på föreningarnas
  * riktiga hemsidor. Redigera texterna här; komponenterna i samma mapp läser allt härifrån.
  *
- * Sex kapitel: de fem första visar vad hemsidan ger föreningen, det sista
- * presenterar tillval (tillval: true – märks "Tillval" i kapitellistorna).
+ * Fyra kapitel som tar ett par minuter: hemsidan, styrelsens verktyg, försäljningen och
+ * det JnM sköter – med priset sist. Ett kapitel med tillval: true märks "Tillval" i
+ * kapitellistorna. Steg utan mal visar rutan mitt på skärmen.
  *
  *   sida   sökvägen där steget visas. Visningen navigerar dit själv. Sidor under
  *          /admin öppnas i adminpanelens visningsläge (/admin/demo) vid behov. Det
@@ -27,8 +28,6 @@
  * Byter du id på ett steg eller kapitel tappar besökarna det sparade framsteget
  * för just det steget – inget annat.
  */
-
-import { MENYKNAPP } from "./meny";
 
 export interface VisningsSteg {
   id: string;
@@ -64,11 +63,18 @@ function adminBlock(n: number): string {
   return `${ADMIN} > div > :nth-child(${n})`;
 }
 
+/**
+ * Priset som visningens sista kapitel och avslutningen nämner. Samma som i säljbrevet
+ * (webcrawlerns inställning Pris i brevet) – ändras det, ändra båda.
+ */
+export const PRIS = "280 kr i månaden";
+export const PRIS_MOMS = "inklusive moms";
+
 export const kapitel: VisningsKapitel[] = [
   {
     id: "hemsidan",
     rubrik: "{foreningens} hemsida",
-    kort: "Nyheter, meddelanden och kontaktuppgifter – allt samlat på ett ställe",
+    kort: "Ansikte utåt, nyheter och dokument – allt de boende behöver på ett ställe",
     steg: [
       {
         id: "forstasida",
@@ -77,107 +83,51 @@ export const kapitel: VisningsKapitel[] = [
         mal: ["header"],
         ingenRullning: true,
         rubrik: "Ett ansikte utåt för {forening}",
-        text: "Det första boende, köpare och mäklare möter är föreningens namn och bild. Ni kan också få en video av fastigheten, filmad av en drönaroperatör. Ett vårdat intryck som visar att föreningen sköts ordentligt.",
+        text: "Det första boende, köpare och mäklare möter är föreningens namn och bild – gärna en film av huset, filmad med drönare. Ett vårdat intryck som visar att föreningen sköts ordentligt.",
         nytta: "Förtroende från första klicket",
-      },
-      {
-        id: "meny",
-        sida: "/",
-        // ⋯-knappen. Pekaren klickar på den, menyn öppnas och ramas in, och
-        // sidan står kvar i toppen med filmen bakom menyn.
-        mal: [MENYKNAPP],
-        oppnaMeny: { pekare: "Detta är menyn" },
-        ingenRullning: true,
-        rubrik: "All viktig information på ett ställe",
-        text: "Menyn är ordnad efter vem som frågar: den som bor här, den som vill veta mer om föreningen och den som funderar på att köpa. Alla hittar rätt utan att behöva fråga styrelsen.",
-        nytta: "Färre frågor till styrelsen",
       },
       {
         id: "nyheter",
         sida: "/",
         mal: ['[data-tour="senaste-nytt"]'],
-        rubrik: "Nyheter och meddelanden",
-        text: "Styrelsen publicerar nyheter och meddelanden direkt från adminpanelen, med bild, på några minuter. De senaste syns på startsidan och finns kvar för den som missade lappen i trapphuset.",
+        rubrik: "Nyheter i stället för lappar",
+        text: "Styrelsen publicerar nyheter med bild direkt från adminpanelen, på några minuter. De syns på startsidan och finns kvar för den som missade lappen i trapphuset.",
         nytta: "Ersätter lappar, utskick och långa mejlkedjor",
       },
       {
-        id: "kontakt",
-        sida: "/kontakt",
-        // Styrelsens ruta och leverantörerna under den (kontakt/page.tsx).
-        mal: ['[data-tour="kontakt-kort"]', "main header"],
-        rubrik: "Kontaktuppgifter som alltid stämmer",
-        text: "Styrelsen och föreningens leverantörer – som hissfirman och vaktmästaren – med telefon och e-post på ett ställe. Boende hör av sig till rätt person direkt, utan att gå via styrelsen.",
-        nytta: "Rätt nummer när något händer",
+        id: "dokument",
+        sida: "/arsredovisningar",
+        mal: ['[data-tour="arsredovisningar-lista"]', "main header"],
+        rubrik: "Dokumenten alltid till hands",
+        text: "Årsredovisningar, stadgar och trivselregler går att ladda ner dygnet runt – för boende, mäklare och köpare. Protokoll och andra interna dokument visas bara för inloggade medlemmar.",
+        nytta: "Slipp mejla ut samma dokument om och om igen",
       },
     ],
     nytta: [
       "Ett professionellt ansikte utåt för {forening}",
-      "Nyheter och meddelanden som når alla boende",
-      "Kontaktuppgifter som alltid är aktuella",
-    ],
-  },
-  {
-    id: "boende",
-    rubrik: "För de boende",
-    kort: "Årsredovisningar, stadgar, trivselregler och ekonomin i lättlästa nyckeltal",
-    steg: [
-      {
-        id: "arsredovisningar",
-        sida: "/arsredovisningar",
-        mal: ['[data-tour="arsredovisningar-lista"]', "main header"],
-        rubrik: "Årsredovisningarna samlade",
-        text: "Alla årsredovisningar finns på ett ställe och går att ladda ner dygnet runt – för boende, mäklare och spekulanter.",
-        nytta: "Slipp mejla ut samma dokument om och om igen",
-      },
-      {
-        id: "stadgar",
-        sida: "/stadgar",
-        mal: ['[data-tour="stadgar-lista"]', "main header"],
-        rubrik: "Stadgar och trivselregler",
-        text: "Stadgarna och ordningsreglerna – det som gäller i vardagen – finns alltid i den senaste versionen. Interna dokument, som protokoll, visas bara för inloggade medlemmar.",
-      },
-      {
-        id: "ekonomi",
-        sida: "/ekonomi",
-        mal: ['[data-tour="ekonomi"] > :first-child', "main header"],
-        rubrik: "Ekonomin i lättlästa nyckeltal",
-        text: "Nyckeltal, avgiftsnivå och planerat underhåll visas så att alla förstår – utan att behöva läsa en hel årsredovisning. Är årsredovisningen svår att tyda hjälper vår support styrelsen att få in rätt siffror.",
-        nytta: "Boende och köpare förstår ekonomin",
-      },
-    ],
-    nytta: [
-      "Boende hittar svaren själva – utan att kontakta styrelsen",
-      "Alltid den senaste versionen av stadgar och regler",
-      "Ekonomin begriplig även för den som inte läser årsredovisningar",
+      "Nyheter som når alla boende",
+      "Dokumenten som alla hittar själva",
     ],
   },
   {
     id: "styrelsen",
     rubrik: "Styrelsens arbetsverktyg",
-    kort: "Ärenden, arbetslogg, mötesunderlag och leverantörer – och kunskap som stannar kvar",
+    kort: "Felanmälningar som ärenden med historik och mötesunderlag på några minuter",
     steg: [
       {
         id: "oversikt",
         sida: "/admin",
         mal: ['[data-tour="admin-oversikt"]', ADMIN],
         rubrik: "Allt styrelsen arbetar med, på ett ställe",
-        text: "Adminpanelen är styrelsens arbetsverktyg. Översikten visar vad som väntar: nya medlemmar, öppna ärenden, annonser och utkast. Det här är ett visningsläge – klicka gärna runt efteråt, inget sparas.",
+        text: "Adminpanelen är styrelsens arbetsverktyg. Översikten visar vad som väntar: öppna ärenden, annonser och utkast. Det här är ett visningsläge – klicka gärna runt efteråt, inget sparas.",
       },
       {
         id: "arenden",
         sida: "/admin/felanmalningar",
         mal: [adminBlock(2), ADMIN],
-        rubrik: "Ärenden med arbetslogg",
-        text: "Felanmälningar från de boende blir ärenden med status, ansvarig och noteringar. Allt som görs sparas i ärendets historik – en arbetslogg som inte går att ändra i efterhand.",
+        rubrik: "Felanmälningar blir ärenden",
+        text: "Det de boende anmäler blir ärenden med status, ansvarig och leverantör. Allt som görs sparas i ärendets historik – den finns kvar även när styrelsen byts.",
         nytta: "Inget faller mellan stolarna",
-      },
-      {
-        id: "leverantorer",
-        sida: "/admin/felanmalningar",
-        mal: [adminBlock(4), ADMIN],
-        rubrik: "Leverantörerna samlade",
-        text: "För varje kategori anger styrelsen vem som utför jobbet, med kontaktuppgifter och noteringar som avtalsnummer och jourtider. Då vet alla direkt vem som ska ringas.",
-        nytta: "Rätt hantverkare direkt – även för nya ledamöter",
       },
       {
         id: "moteslage",
@@ -187,109 +137,63 @@ export const kapitel: VisningsKapitel[] = [
         text: "Månadens ärenden samlade på en sida inför styrelsemötet: gå igenom dem rad för rad och kopiera sedan färdig protokolltext.",
         nytta: "Felanmälningspunkten på mötet går på några minuter",
       },
-      {
-        id: "overlamning",
-        sida: "/admin/medlemmar",
-        mal: [adminBlock(1), ADMIN],
-        rubrik: "Kunskapen stannar i föreningen",
-        text: "När styrelsen byts ger ni de nya ledamöterna behörighet här. Ärenden med historik, dokument, leverantörer och föreningsfakta finns kvar – inget försvinner med den som avgår.",
-        nytta: "Enkelt att lämna över när styrelsen byts",
-      },
     ],
     nytta: [
       "Mindre administration – allt sköts från ett ställe",
       "Ärenden och mötesunderlag utan extra arbete",
-      "Kunskapen bevaras när styrelsen byts",
+      "Historiken finns kvar när styrelsen byts",
     ],
   },
   {
     id: "forsaljning",
-    rubrik: "Vid försäljning av bostaden",
-    kort: "Säljaren förbereder försäljningen – mäklare och köpare hittar informationen själva",
+    rubrik: "När någon säljer",
+    kort: "Mäklare och köpare hittar föreningsfakta själva",
     steg: [
-      {
-        id: "till-salu",
-        sida: "/till-salu",
-        mal: ["main header"],
-        rubrik: "Försäljningen förbereds på hemsidan",
-        text: "Den som ska sälja lägger själv upp sin lägenhet under Mina sidor, med bilder och planritning. Köpare hittar annonserna och föreningsfakta på samma ställe.",
-      },
-      {
-        id: "godkannande",
-        sida: "/admin/till-salu",
-        mal: [adminBlock(1), ADMIN],
-        rubrik: "Styrelsen har överblicken",
-        text: "Styrelsen ser alla pågående försäljningar på ett ställe och godkänner annonserna innan de syns på hemsidan.",
-      },
       {
         id: "maklare",
         sida: "/for-maklare",
         mal: ['[data-tour="maklare-fakta"]', "main header"],
         rubrik: "Mäklarfrågorna besvarar sig själva",
-        text: "Föreningsfakta, renoveringar och ekonomi samlas på en sida som mäklare och köpare hittar själva. Uppgifterna är de styrelsen redan fyllt i under Föreningsinfo.",
+        text: "Föreningsfakta, renoveringar och ekonomi på en sida som mäklare och köpare hittar själva. Den som säljer kan också lägga upp sin lägenhet, och styrelsen godkänner annonsen innan den syns.",
         nytta: "Färre samtal och mejl från mäklare",
       },
     ],
-    nytta: [
-      "Säljaren förbereder försäljningen själv",
-      "Mäklare och köpare får rätt uppgifter direkt",
-      "Färre samtal och mejl till styrelsen",
-    ],
+    nytta: ["Mäklare och köpare får rätt uppgifter direkt", "Färre samtal och mejl till styrelsen"],
   },
   {
-    id: "tekniken",
-    rubrik: "Vi tar hand om tekniken",
-    kort: "Drift, uppdateringar och support – med full insyn för styrelsen",
+    id: "support",
+    rubrik: "Vi sköter resten",
+    kort: `Nyckeltalen, medlemmarnas inloggning och tekniken – ${PRIS}`,
     steg: [
       {
-        id: "drift",
-        sida: "/admin/supportlogg",
-        mal: [adminBlock(1), ADMIN],
-        rubrik: "Ni slipper tekniken",
-        text: "JnM sköter drift, uppdateringar och support. Styrelsen behöver aldrig tänka på servrar eller tekniskt underhåll – bara på innehållet.",
-        nytta: "Inget tekniskt underhåll för styrelsen",
+        id: "nyckeltal",
+        sida: "/ekonomi",
+        mal: ['[data-tour="ekonomi"] > :first-child', "main header"],
+        rubrik: "Vi uppdaterar nyckeltalen",
+        text: "Ekonomin visas i lättlästa nyckeltal, så att alla förstår den utan att läsa hela årsredovisningen. Varje år när den nya årsredovisningen är klar uppdaterar vi siffrorna åt er – skicka bara över den.",
+        nytta: "Ekonomin på hemsidan är alltid aktuell",
       },
       {
-        id: "supportlogg",
+        id: "medlemmar",
         sida: "/admin/supportlogg",
         mal: [adminBlock(2), ADMIN],
-        rubrik: "Full insyn i supportloggen",
-        text: "Varje gång supporten hjälper till i adminpanelen loggas det automatiskt: vem som var inne, varför och vad som ändrades. Loggen går inte att ändra i efterhand.",
-        nytta: "Ni ser alltid vad som gjorts",
+        rubrik: "Vi hjälper medlemmarna",
+        text: "Har någon problem att logga in, eller ska nya ledamöter in när styrelsen byts? Det sköter vi, liksom drift och uppdateringar. Allt vi gör i adminpanelen loggas här, så att ni alltid ser vad som ändrats.",
+        nytta: "Styrelsen slipper teknikfrågorna",
+      },
+      {
+        id: "pris",
+        // Ingen markering: rutan visas mitt på startsidan.
+        sida: "/",
+        ingenRullning: true,
+        rubrik: `${PRIS} – allt ingår`,
+        text: `Hemsidan med adminpanel, en databas för bilder, filer och nyheter, drift, support och egen domän – och hjälpen med nyckeltal och inloggning. Priset är ${PRIS_MOMS}. Första året binder ni er i tolv månader, sedan finns ingen bindningstid. Digitala trapphustavlor finns som tillval.`,
       },
     ],
     nytta: [
-      "JnM sköter drift och uppdateringar",
-      "Support när styrelsen behöver hjälp",
-      "Full insyn i allt supporten gör",
-    ],
-  },
-  {
-    id: "tillval",
-    rubrik: "Tillval och möjligheter",
-    kort: "Digitala trapphustavlor med föreningens nyheter och meddelanden",
-    tillval: true,
-    // Fler tilläggstjänster presenteras som fler steg här.
-    steg: [
-      {
-        id: "trapphustavlor",
-        sida: "/admin/tavlor",
-        mal: [adminBlock(1), ADMIN],
-        rubrik: "Digitala trapphustavlor",
-        text: "Skärmar i trapphusen visar föreningens nyheter och meddelanden direkt från hemsidan. De hämtar nytt innehåll automatiskt och visar det senaste även om nätet ligger nere.",
-        nytta: "Anslagstavlan av papper blir ett minne blott",
-      },
-      {
-        id: "anslag",
-        sida: "/admin/tavlor",
-        mal: [adminBlock(2), ADMIN],
-        rubrik: "Anslag på några minuter",
-        text: "Skriv ett anslag, lägg till en bild och välj när det ska visas. Skärmarna i trapphusen uppdateras av sig själva.",
-      },
-    ],
-    nytta: [
-      "Samma information på webben och i trapphuset",
-      "Styrs från samma adminpanel som hemsidan",
+      "Nyckeltalen uppdateras efter varje årsredovisning",
+      "Hjälp med inloggning och nya ledamöter",
+      `${PRIS} ${PRIS_MOMS} – allt ingår`,
     ],
   },
 ];

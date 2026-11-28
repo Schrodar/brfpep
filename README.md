@@ -184,6 +184,13 @@ Push och import vägrar köra om `DATABASE_URL` pekar på Supabase, så att kund
 databas aldrig kan skrivas över. Demodata (till exempel leverantörer och möten) läggs
 in i fixturen eller direkt i demodatabasen – aldrig i den delade databasen.
 
+Den 25 november 2026 fylldes fixturen med en vanlig månad: åtta felanmälningar med historik,
+leverantörer i kategorierna, fem nyheter (ett utkast), en annons att godkänna och en publicerad,
+en supportlogg utan testposter och dokumenttitlar utan demonamnet. Kopian av fixturen före
+ändringen ligger i `demo/data.fore-2026-11-25.json`. Samma ändringar finns som SQL i
+`demo/fyll-pa-2026-11-25.sql`, för demons Postgres i Coolify (`psql -U postgres -d postgres`).
+Filen har fasta id:n och går att köra flera gånger.
+
 ## Demoläge (säljdemo)
 
 Brf Pep är en demoförening. Med `DEMO_MODE=true` blir sajten en personlig demo för
@@ -191,17 +198,32 @@ säljbreven som skickas från webcrawlern (JnM Creative studio).
 
 **Så fungerar det:**
 
-1. Säljbrevets knapp länkar till `https://<demo>/?f=<föreningens namn>&s=<signatur>`.
+1. Säljbrevets länk går till `https://<demo>/?f=<föreningens namn>&s=<signatur>`.
    Signaturen är HMAC-SHA256 (hex, de första 32 tecknen) av namnet, med hemligheten
    `DEMO_LINK_SECRET` – samma hemlighet som i webcrawlerns `.env`.
+   Länken har också föreningens uppgifter ur webcrawlerns register: `a` (gatuadress), `pn`
+   (postnummer), `o` (ort) och `n` (organisationsnummer), med en egen signatur `t` över namnet
+   och uppgifterna (`faktatext` i `src/lib/demo.ts`, samma som `mejl.faktatext` i webcrawlern).
+   Adressen följer bara med när den är föreningens egen, aldrig en c/o-, box- eller
+   förvaltaradress. Namnets signatur `s` är densamma med och utan uppgifter.
 2. Proxyn (`src/proxy.ts`) skriver om länken till routen `src/app/api/demo-lank`, som
    kontrollerar signaturen på servern (`src/lib/demo.ts`). Stämmer den sätts cookien
    `demo_forening` (30 dagar), öppningen noteras (se nedan) och besökaren skickas vidare
    till `/` utan parametrar. En felaktig eller påhittad länk ger vanlig demo – ingen kan få
-   sajten att visa godtycklig text.
-3. Webbläsaren läser cookien (`useDemoForening`): startsidan hälsar "Välkommen till
-   {förening}", namnet visas i sidhuvudet och ett diskret kort nere till höger förklarar
-   att det är en demo. Sidorna förblir statiska.
+   sajten att visa godtycklig text. Uppgifterna hamnar i cookien `demo_fakta` bara när `t`
+   stämmer; annars tas en tidigare länks uppgifter bort.
+3. Webbläsaren läser cookierna (`useDemoForening`, `useDemoFakta`): startsidan hälsar
+   "Välkommen till {förening}" med föreningens ort, namnet visas i sidhuvudet, och sidfoten,
+   menyn och För mäklare visar föreningens adress och organisationsnummer
+   (`src/components/demo/demo-fakta.tsx`). Utan uppgifter i länken visas inga alls –
+   aldrig demoföreningens med föreningens namn. Sidorna förblir statiska.
+   - **Demoföreningens namn syns aldrig** för den som har en personlig länk, inte ens medan
+     sidan laddas: ett litet skript först i `<body>` (`demoSkript`) byter fliktiteln och
+     sätter `data-demo-personlig` på `<html>`, och `globals.css` döljer demoföreningens
+     texter (`data-demo-standard`) tills React bytt in föreningens egna.
+   - **Länkförhandsvisningar:** en chattapp eller ett annat program som hämtar länken får en
+     liten sida med föreningens namn i titeln (`forhandsvisning` i routen), i stället för
+     startsidan med demoföreningens namn. En människa skickas vidare som vanligt.
 4. Med `DEMO_MODE` påslaget får sidorna `noindex`, så att demon inte syns i sökmotorer.
 
 **Vilka som tittat (händelseloggen):** demon noterar när en personlig länk öppnas och när
@@ -228,6 +250,7 @@ och hur de nås (`src/lib/demo-handelser.ts`).
 |---|:---:|:---:|
 | `DEMO_MODE=true` | ✓ (för `noindex`) | ✓ (för demolänkarna) |
 | `DEMO_LINK_SECRET` | | ✓ |
+| `DEMO_KONTAKT_TELEFON` – numret i Boka en visning (valfritt) | ✓ | ✓ |
 
 **Mejlbilder:** säljbrevets produktbilder ligger i `public/mejl/` (`hemsida.jpg`,
 `tavla.jpg`) och nås på `https://<demo>/mejl/…`. De tas fram i webcrawlern med
@@ -238,6 +261,11 @@ och hur de nås (`src/lib/demo-handelser.ts`).
 (`/tavla/<token>`) som "Länk till tavlan i demon" i webcrawlerns Inställningar. Det är
 innehåll i demoföreningen, ingen kod.
 
+**Demorutan** (`demo-banderoll.tsx`) syns för den som har en personlig länk, först när
+välkomstrutan är besvarad. På mobilen är den en låg list längst ned med Guidad visning och
+Boka en visning, så att startsidans rubrik syns; visningens egen knapp göms då. På större
+skärmar är den ett kort nere till höger. Boka en visning öppnar kontaktformuläret.
+
 **Visningsläge för adminpanelen:** demokortet har länken "Prova styrelsens adminpanel"
 (`/admin/demo`). Den sätter cookien `demo_admin` (ett dygn) och öppnar adminpanelen utan
 inloggning, med en banner om att inget sparas. Varje sparning stoppas i `requireAdmin()`
@@ -247,17 +275,19 @@ beskedet "Det här är en demo" (`admin/error.tsx`). `/admin/demo?avsluta` tar b
 Se `src/lib/demo-admin.ts`. Utan `DEMO_MODE` svarar `/admin/demo` 404.
 
 **Guidad visning:** besökaren får en välkomstruta med en kapitelindelad rundtur
-(`src/components/demo/guidad-visning/`) – även utan `DEMO_MODE`. Rundturen har sex kapitel:
-de fem första visar vad hemsidan ger föreningen, det sista presenterar tillval (trapphustavlor,
-märkt "Tillval"). Adminsidorna visas i
+(`src/components/demo/guidad-visning/`) – även utan `DEMO_MODE`. Rundturen har fyra korta
+kapitel, tio steg: hemsidan, styrelsens arbetsverktyg, försäljningen och "Vi sköter resten" –
+nyckeltalen som JnM uppdaterar efter varje årsredovisning, hjälpen med medlemmarnas inloggning
+och nya ledamöter, och sist priset (`PRIS` i `kapitel.ts`, samma som i webcrawlerns
+inställning "Pris i brevet"). Adminsidorna visas i
 adminpanelens visningsläge, som bara finns i demoläget, så utan `DEMO_MODE` hoppar
-visningen över dem. Demokortets knapp "Starta guidad visning"
-startar den (eller fortsätter där besökaren var), och knappen nere till vänster öppnar
-kapitelmenyn. Kapitel och texter redigeras i
+visningen över dem. Demorutans knapp startar den (eller fortsätter där besökaren var), och
+knappen nere till vänster öppnar kapitelmenyn. Kapitel och texter redigeras i
 `kapitel.ts`; markerade element pekas ut med `data-tour="…"` på sidorna. Framsteget sparas
 i webbläsaren (localStorage), separat per personlig demo.
 
-**Kontaktformuläret i avslutningen** ("Kontakta oss") mejlar via Resend
+**Boka en visning** – kontaktformuläret i avslutningen och i demorutan – visar numret i
+`DEMO_KONTAKT_TELEFON` om det finns, och mejlar via Resend
 (`src/app/api/demo-kontakt/route.ts`) till `DEMO_KONTAKT_EPOST`, annars info@byjnm.se.
 Sätt `RESEND_API_KEY` och `DEMO_KONTAKT_FRAN` – en avsändaradress på en domän som är
 verifierad i Resend, t.ex. demo@byjnm.se. Resend skickar bara från verifierade domäner,

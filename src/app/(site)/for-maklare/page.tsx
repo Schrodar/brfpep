@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getAssociationInfo, getAssociationProfile } from "@/lib/data";
 import { hasPropertyManager } from "@/lib/utils";
 import { EmailLink, PhoneLink } from "@/components/association";
+import { DemoFaktaNotis, DemoOrgnr } from "@/components/demo/demo-fakta";
 import { DemoNamn } from "@/components/demo/demo-namn";
 import { Card, CardBody, Container, PageIntro, Section } from "@/components/ui";
 
@@ -15,17 +16,20 @@ function FactRow({
   label,
   value,
   namn = false,
+  orgnr = false,
 }: {
   label: string;
   value: string;
   /** Föreningens namn: byts mot namnet från en demolänk i demoläget. */
   namn?: boolean;
+  /** Organisationsnumret: byts mot numret från en demolänk i demoläget. */
+  orgnr?: boolean;
 }) {
   return (
     <div className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
       <dt className="text-sm font-medium text-muted">{label}</dt>
       <dd className="text-sm text-foreground sm:col-span-2">
-        {namn ? <DemoNamn namn={value} /> : value}
+        {namn ? <DemoNamn namn={value} /> : orgnr ? <DemoOrgnr orgnr={value} /> : value}
       </dd>
     </div>
   );
@@ -41,11 +45,12 @@ export default async function BrokerPage() {
 
   // Ofyllda uppgifter visas inte. Tom sträng och 0 betyder "inte ifyllt" –
   // hellre en kort sida än ett påhittat byggår inför en spekulant.
-  const allFacts: { label: string; value: string; namn?: boolean }[] = [
+  const allFacts: { label: string; value: string; namn?: boolean; orgnr?: boolean }[] = [
     { label: "Föreningens namn", value: association.name, namn: true },
     {
       label: "Organisationsnummer",
       value: association.organizationNumber,
+      orgnr: true,
     },
     { label: "Föreningsform", value: info.associationType },
     { label: "Byggår", value: String(info.builtYear) },
@@ -82,11 +87,14 @@ export default async function BrokerPage() {
                     aktuell information.
                   </p>
                 ) : (
-                  <dl className="mt-2 divide-y divide-border">
-                    {facts.map((fact) => (
-                      <FactRow key={fact.label} {...fact} />
-                    ))}
-                  </dl>
+                  <>
+                    <dl className="mt-2 divide-y divide-border">
+                      {facts.map((fact) => (
+                        <FactRow key={fact.label} {...fact} />
+                      ))}
+                    </dl>
+                    <DemoFaktaNotis className="mt-4 text-xs leading-relaxed text-muted" />
+                  </>
                 )}
               </CardBody>
             </Card>

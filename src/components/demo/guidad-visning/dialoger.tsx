@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { antalAvklarade, type Framsteg } from "./framsteg";
-import { kapitelgranser, medNamn, type VisningsKapitel } from "./kapitel";
+import { kapitelgranser, medNamn, PRIS, PRIS_MOMS, type VisningsKapitel } from "./kapitel";
 import { Kontaktformular } from "./kontaktformular";
 import { Bock, Dialogruta, knapp, Progressbar, Progressring, StangIkon, TillvalEtikett } from "./ui";
 
@@ -30,8 +30,8 @@ export function Valkomst({
           {forening ? `Välkommen, ${forening}` : "Välkommen till er nya hemsida"}
         </p>
         <p className="mt-3 text-[15px] leading-relaxed text-muted">
-          Följ med på en kort rundtur i {RAKNEORD[kapitel.length] ?? kapitel.length} kapitel och se hur hemsidan
-          sparar tid för styrelsen och gör vardagen enklare för de boende.
+          Följ med på en rundtur i {RAKNEORD[kapitel.length] ?? kapitel.length} korta kapitel – det tar ett par
+          minuter – och se hur hemsidan sparar tid för styrelsen och gör vardagen enklare för de boende.
         </p>
       </div>
       <ol className="space-y-1 px-6 py-5 sm:px-8">
@@ -252,12 +252,13 @@ export function Kapitelmeny({
   );
 }
 
-/** Avslutningen: vad hemsidan ger föreningen, och en diskret väg vidare. */
+/** Avslutningen: vad hemsidan ger föreningen, priset och vägen vidare – boka en visning eller ring. */
 export function Avslutning({
   kapitel,
   forening,
   avklarade,
   kontaktEpost,
+  telefon,
   onStang,
 }: {
   kapitel: VisningsKapitel[];
@@ -266,16 +267,19 @@ export function Avslutning({
   avklarade: number;
   /** Mottagaren för kontaktformuläret, som reserv om det inte går att skicka. */
   kontaktEpost?: string;
+  /** Numret att ringa (DEMO_KONTAKT_TELEFON), om det finns. */
+  telefon?: string;
   onStang: () => void;
 }) {
   const [kontakt, setKontakt] = useState(false);
 
   if (kontakt) {
     return (
-      <Dialogruta rubrik="Kontakta oss" onEscape={onStang} bred>
+      <Dialogruta rubrik="Boka en visning" onEscape={onStang} bred>
         <Kontaktformular
           forening={forening}
           kontaktEpost={kontaktEpost}
+          telefon={telefon}
           onTillbaka={() => setKontakt(false)}
           onStang={onStang}
         />
@@ -299,7 +303,10 @@ export function Avslutning({
         </p>
         <p className="mt-3 max-w-xl text-[15px] leading-relaxed text-muted">
           Mindre administration, enklare kommunikation och tydligare ansvar – samlat på ett ställe. Styrelsen
-          sköter innehållet, vi sköter tekniken.
+          sköter innehållet, vi sköter resten.
+        </p>
+        <p className="mt-3 text-[15px] font-semibold text-ink">
+          {PRIS} {PRIS_MOMS} – drift, support, egen domän och en databas för bilder, filer och nyheter ingår.
         </p>
       </div>
 
@@ -326,10 +333,20 @@ export function Avslutning({
 
       {/* Fast i rutans nederkant, så att knapparna syns utan att man rullar. */}
       <div className="sticky bottom-0 flex flex-col gap-2 border-t border-line bg-surface px-6 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-9">
-        <button type="button" onClick={() => setKontakt(true)} className={knapp.primar}>
-          Kontakta oss
-          <span aria-hidden="true">→</span>
-        </button>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+          <button type="button" onClick={() => setKontakt(true)} className={knapp.primar}>
+            Boka en visning
+            <span aria-hidden="true">→</span>
+          </button>
+          {telefon ? (
+            <p className="text-center text-sm text-muted sm:text-left">
+              eller ring{" "}
+              <a href={`tel:${telefon.replace(/[^\d+]/g, "")}`} className="whitespace-nowrap font-semibold text-moss hover:underline">
+                {telefon}
+              </a>
+            </p>
+          ) : null}
+        </div>
         <button type="button" onClick={onStang} data-autofocus className={knapp.sekundar}>
           Utforska sidan på egen hand
         </button>

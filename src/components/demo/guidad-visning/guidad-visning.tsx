@@ -7,6 +7,7 @@ import { useTransition } from "@/components/page-transition/TransitionProvider";
 import { DEMO_ADMIN_COOKIE } from "@/lib/demo";
 import { cn } from "@/lib/utils";
 import { Avslutning, KapitelKlart, Kapitelmeny, Valkomst } from "./dialoger";
+import { Kontaktformular } from "./kontaktformular";
 import {
   antalAvklarade,
   lasFramsteg,
@@ -22,11 +23,16 @@ import { kapitelFor, medNamn, type VisningsSteg } from "./kapitel";
 import { MENYKNAPP, MENYPANEL, menynArFramme, oppnaMenyn, stangMenyn } from "./meny";
 import { Pekare } from "./pekare";
 import { rektFor, Spotlight, type Rekt } from "./spotlight";
-import { STARTA_HANDELSE } from "./starta-knapp";
+import { BOKA_HANDELSE, STARTA_HANDELSE } from "./starta-knapp";
 import { StegRuta } from "./steg-ruta";
-import { Progressring, useReduceradRorelse } from "./ui";
+import { Dialogruta, Progressring, useReduceradRorelse } from "./ui";
 
-type Vy = { typ: "kapitelKlart"; kapitel: number } | { typ: "meny" } | { typ: "avslutning" } | null;
+type Vy =
+  | { typ: "kapitelKlart"; kapitel: number }
+  | { typ: "meny" }
+  | { typ: "avslutning" }
+  | { typ: "boka" }
+  | null;
 
 /** Hur länge ett steg väntar på att dess element ska dyka upp (dynamiskt innehåll). */
 const VANTA_PA_MAL_MS = 4000;
@@ -56,7 +62,16 @@ type MenyFas = "pekar" | "oppnar" | "oppen";
  * Renderas av SiteChrome på demosajten, även utan DEMO_MODE – aldrig på
  * föreningarnas riktiga hemsidor. Med `demo` (DEMO_MODE=true) tas adminsidorna med.
  */
-export function GuidadVisning({ demo, kontaktEpost }: { demo: boolean; kontaktEpost?: string }) {
+export function GuidadVisning({
+  demo,
+  kontaktEpost,
+  kontaktTelefon,
+}: {
+  demo: boolean;
+  kontaktEpost?: string;
+  /** Numret i Boka en visning och avslutningen (DEMO_KONTAKT_TELEFON). */
+  kontaktTelefon?: string;
+}) {
   const kapitel = kapitelFor(demo);
   const forening = useDemoForening();
   const nyckel = nyckelFor(forening);
@@ -372,6 +387,16 @@ export function GuidadVisning({ demo, kontaktEpost }: { demo: boolean; kontaktEp
     return () => window.removeEventListener(STARTA_HANDELSE, starta);
   }, [nyckel, kapitel, startaOm, fortsatt]);
 
+  // Demorutans Boka en visning öppnar kontaktformuläret.
+  useEffect(() => {
+    const boka = () => {
+      setNotis(null);
+      setVy({ typ: "boka" });
+    };
+    window.addEventListener(BOKA_HANDELSE, boka);
+    return () => window.removeEventListener(BOKA_HANDELSE, boka);
+  }, []);
+
   // Piltangenter bläddrar, Esc pausar – bara medan ett steg visas.
   useEffect(() => {
     if (!steg) return;
@@ -420,6 +445,20 @@ export function GuidadVisning({ demo, kontaktEpost }: { demo: boolean; kontaktEp
     );
   }
 
+  if (vy?.typ === "boka") {
+    return (
+      <Dialogruta rubrik="Boka en visning" onEscape={() => setVy(null)} bred>
+        <Kontaktformular
+          forening={forening}
+          kontaktEpost={kontaktEpost}
+          telefon={kontaktTelefon}
+          onTillbaka={() => setVy(null)}
+          onStang={() => setVy(null)}
+        />
+      </Dialogruta>
+    );
+  }
+
   if (vy?.typ === "avslutning") {
     return (
       <Avslutning
@@ -427,6 +466,7 @@ export function GuidadVisning({ demo, kontaktEpost }: { demo: boolean; kontaktEp
         forening={forening}
         avklarade={antalAvklarade(framsteg, kapitel)}
         kontaktEpost={kontaktEpost}
+        telefon={kontaktTelefon}
         onStang={() => {
           setVy(null);
           setNotis("Klicka runt fritt – visningen finns kvar här nere.");
@@ -493,7 +533,10 @@ export function GuidadVisning({ demo, kontaktEpost }: { demo: boolean; kontaktEp
   );
 }
 
-/** Diskret knapp nere till vänster – demobanderollen ligger till höger (mobil: överst). */
+/**
+ * Diskret knapp nere till vänster – demorutan ligger till höger. På mobilen göms knappen
+ * medan demorutans list syns, eftersom listen har samma knapp (globals.css).
+ */
 function Visningsknapp({
   framsteg,
   procent,
@@ -513,7 +556,7 @@ function Visningsknapp({
       : "Guidad visning";
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 flex flex-col items-start gap-2 font-body sm:bottom-6 sm:left-6">
+    <div data-visningsknapp="" className="fixed bottom-4 left-4 z-50 flex flex-col items-start gap-2 font-body sm:bottom-6 sm:left-6">
       {notis ? (
         <p role="status" className="visning-in max-w-[16rem] rounded-2xl border border-line bg-surface/95 px-4 py-2.5 text-xs leading-snug text-ink shadow-lg backdrop-blur">
           {notis}

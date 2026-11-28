@@ -535,6 +535,26 @@ html[data-guidad-visning] [data-demo-banderoll] {
   opacity: 0;
   visibility: hidden;
 }
+/* Den som kommit via en personlig demolänk ser aldrig demoföreningens namn och uppgifter,
+   inte heller medan sidan laddas: skriptet i <body> sätter attributet (demoSkript i
+   src/lib/demo.ts), och komponenterna tar bort märkningen när föreningens egna är på plats. */
+html[data-demo-personlig] [data-demo-standard] {
+  visibility: hidden;
+}
+/* Mobil: demorutans list längst ned har knappen för den guidade visningen, så visningens
+   egen knapp nere till vänster göms medan listen finns (se demo-banderoll.tsx). */
+@media (max-width: 639.98px) {
+  html:has([data-demo-banderoll]) [data-visningsknapp] {
+    display: none;
+  }
+  /* Listen ska inte täcka heroens knappar eller sidfotens sista rad. */
+  html:has([data-demo-banderoll]) [data-hero-innehall] {
+    padding-bottom: 8.5rem;
+  }
+  html:has([data-demo-banderoll]) body {
+    padding-bottom: 6.5rem;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .visning-in,
   .visning-tona,

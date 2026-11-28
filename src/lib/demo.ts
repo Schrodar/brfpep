@@ -20,6 +20,11 @@ export const DEMO_COOKIE = "demo_forening";
 export const DEMO_LANK_COOKIE = "demo_lank";
 /** Visningsläget för adminpanelen (se src/lib/demo-admin.ts). */
 export const DEMO_ADMIN_COOKIE = "demo_admin";
+/**
+ * Föreningens adress och organisationsnummer från demolänken (se DemoFakta), som JSON.
+ * Läses av webbläsaren, liksom namnet.
+ */
+export const DEMO_FAKTA_COOKIE = "demo_fakta";
 export const DEMO_MAX_LANGD = 80;
 const SIGNATURLANGD = 32;
 
@@ -100,6 +105,108 @@ export function apiNyckel(hemlighet: string): Promise<string> {
 export async function lankbevis(sig: string, hemlighet: string): Promise<string> {
   const s = sig.toLowerCase();
   return `${s}.${await signatur(`\u0000lank:${s}`, hemlighet)}`;
+}
+
+/**
+ * Uppgifter om föreningen som demolänken kan ha med utöver namnet, ur webcrawlerns register:
+ * gatuadress, postnummer och ort (bara när adressen är föreningens egen, aldrig en c/o-,
+ * box- eller förvaltaradress) och organisationsnummer. Demon visar dem i sidfoten, i menyn och
+ * under För mäklare, i stället för demoföreningens.
+ */
+export interface DemoFakta {
+  adress: string;
+  postnummer: string;
+  ort: string;
+  orgnr: string;
+}
+
+/** Länkens parametrar för uppgifterna, i den ordning de signeras. */
+export const FAKTA_PARAMETRAR = [
+  ["a", "adress"],
+  ["pn", "postnummer"],
+  ["o", "ort"],
+  ["n", "orgnr"],
+] as const satisfies readonly (readonly [string, keyof DemoFakta])[];
+
+/** Parametern med uppgifternas egen signatur. Namnets signatur (s) är oförändrad. */
+export const FAKTA_SIGNATUR = "t";
+
+/**
+ * Texten som uppgifternas signatur räknas på: namnet och uppgifterna, åtskilda av
+ * kontrolltecken. Den börjar med ett kontrolltecken, så den kan aldrig vara ett
+ * föreningsnamn eller något av de härledda värdena (som börjar med ett nolltecken).
+ * Webcrawlern räknar likadant (mejl.faktatext).
+ */
+export function faktatext(namn: string, fakta: DemoFakta): string {
+  return ["\u0001fakta", namn, ...FAKTA_PARAMETRAR.map(([, falt]) => fakta[falt])].join("\u001f");
+}
+
+/** Uppgifterna ur länkens parametrar (saknade blir tomma), eller null om länken inte har några. */
+export function faktaUrLank(params: URLSearchParams): DemoFakta | null {
+  if (!FAKTA_PARAMETRAR.some(([parameter]) => params.has(parameter))) return null;
+  const fakta: DemoFakta = { adress: "", postnummer: "", ort: "", orgnr: "" };
+  for (const [parameter, falt] of FAKTA_PARAMETRAR) fakta[falt] = params.get(parameter) ?? "";
+  return fakta;
+}
+
+export async function verifieraFakta(
+  namn: string,
+  fakta: DemoFakta,
+  sig: string,
+  hemlighet: string,
+): Promise<boolean> {
+  if (!namn || !hemlighet || sig.length !== SIGNATURLANGD) return false;
+  return likaSakert(await signatur(faktatext(namn, fakta), hemlighet), sig.toLowerCase());
+}
+
+/** Uppgifterna städade som namnet: utan kontrolltecken, på en rad och med begränsad längd. */
+function stadaFakta(varde: Record<string, unknown>): DemoFakta {
+  const fakta: DemoFakta = { adress: "", postnummer: "", ort: "", orgnr: "" };
+  for (const [, falt] of FAKTA_PARAMETRAR) {
+    const text = varde[falt];
+    fakta[falt] = typeof text === "string" ? stadaNamn(text) : "";
+  }
+  return fakta;
+}
+
+/** Värdet i cookien demo_fakta. */
+export function faktaCookie(fakta: DemoFakta): string {
+  return JSON.stringify(stadaFakta({ ...fakta }));
+}
+
+/** Uppgifterna ur cookiens JSON, eller null om den saknas, är tom eller inte går att läsa. */
+export function tolkaFakta(json: string | null): DemoFakta | null {
+  if (!json) return null;
+  try {
+    const varde: unknown = JSON.parse(json);
+    if (!varde || typeof varde !== "object") return null;
+    const fakta = stadaFakta(varde as Record<string, unknown>);
+    return Object.values(fakta).some(Boolean) ? fakta : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Skriptet som körs först i <body> i demoläget, innan sidan ritas. Har besökaren kommit via en
+ * personlig demolänk får <html> attributet data-demo-personlig, och globals.css döljer då
+ * demoföreningens namn och uppgifter ([data-demo-standard]) tills React har bytt in
+ * föreningens egna. Fliktiteln byts direkt, också om Next strömmar in <title> senare.
+ * Den som öppnar sin länk ser alltså aldrig demoföreningens namn, inte ens medan sidan laddas.
+ */
+export function demoSkript(demonamn: string): string {
+  const d = JSON.stringify(demonamn).replace(/</g, "\\u003c");
+  return (
+    "(function(){try{" +
+    `var m=document.cookie.match(/(?:^|; )${DEMO_COOKIE}=([^;]+)/);if(!m)return;` +
+    `var n=decodeURIComponent(m[1]).slice(0,${DEMO_MAX_LANGD});if(!n)return;` +
+    'document.documentElement.setAttribute("data-demo-personlig","");' +
+    `var d=${d};` +
+    "var f=function(){var t=document.title;if(d&&t.indexOf(d)!==-1&&t.indexOf(n)===-1)document.title=t.split(d).join(n)};" +
+    "f();var o=new MutationObserver(f);o.observe(document.documentElement,{childList:true,subtree:true,characterData:true});" +
+    'addEventListener("load",function(){f();setTimeout(function(){o.disconnect()},2000)})' +
+    "}catch(e){}})();"
+  );
 }
 
 /** Länkens signatur ur ett giltigt bevis, annars null. */

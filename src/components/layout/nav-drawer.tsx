@@ -13,7 +13,8 @@ import { usePathname } from "next/navigation";
 import { TransitionLink } from "@/components/page-transition/TransitionLink";
 import { navGroups } from "@/config/site";
 import { siteConfig } from "@/config/siteConfig";
-import { AddressDetails, AssociationLogo } from "@/components/association";
+import { AssociationLogo } from "@/components/association";
+import { DemoAdress } from "@/components/demo/demo-fakta";
 import { DemoNamn } from "@/components/demo/demo-namn";
 import type { AssociationProfile } from "@/lib/types";
 import type { SessionMember } from "@/lib/use-current-member";
@@ -315,7 +316,7 @@ export function NavDrawer({
           {/* Nedre kontaktområde */}
           <div className="shrink-0 border-t border-line px-6 py-5 text-sm text-ink/55 sm:px-7">
             <p className="font-medium text-ink/80">Behöver du hjälp?</p>
-            <AddressDetails
+            <DemoAdress
               address={association}
               className="mt-1.5 leading-relaxed"
             />
