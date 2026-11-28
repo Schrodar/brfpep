@@ -59,7 +59,7 @@ export default async function AdminMaintenancePage() {
       </AdminSection>
 
       <AdminSection
-        title="Kategorier och underleverantörer"
+        title="Register på underleverantörer"
         description={
           missingContractor > 0
             ? `Valen i formulärets rullgardin. ${missingContractor} av ${categories.length} kategorier saknar underleverantör.`
