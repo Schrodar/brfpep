@@ -74,7 +74,7 @@ export const kapitel: VisningsKapitel[] = [
   {
     id: "hemsidan",
     rubrik: "{foreningens} hemsida",
-    kort: "Ansikte utåt, nyheter och dokument – allt de boende behöver på ett ställe",
+    kort: "Ansikte utåt, nyheter, ekonomi och dokument – allt de boende behöver på ett ställe",
     steg: [
       {
         id: "forstasida",
@@ -95,18 +95,21 @@ export const kapitel: VisningsKapitel[] = [
         nytta: "Ersätter lappar, utskick och långa mejlkedjor",
       },
       {
+        // Nyckeltalen, årsredovisningarna och stadgarna i ett steg, på en sida som finns
+        // för visningen. På datorn ligger rutan bredvid blocket, på mobilen syns
+        // nyckeltalen ovanför arket.
         id: "dokument",
-        sida: "/arsredovisningar",
-        mal: ['[data-tour="arsredovisningar-lista"]', "main header"],
-        rubrik: "Dokumenten alltid till hands",
-        text: "Årsredovisningar, stadgar och trivselregler går att ladda ner dygnet runt – för boende, mäklare och köpare. Protokoll och andra interna dokument visas bara för inloggade medlemmar.",
+        sida: "/ekonomi-och-dokument",
+        mal: ['[data-tour="ekonomi-och-dokument"]', "main header"],
+        rubrik: "Ekonomin i klartext, dokumenten ett klick bort",
+        text: "Nyckeltalen gör ekonomin begriplig för alla, och under dem ligger årsredovisningar, stadgar och ordningsregler redo att laddas ner. Siffrorna uppdaterar vi åt er varje år – skicka bara den nya årsredovisningen.",
         nytta: "Slipp mejla ut samma dokument om och om igen",
       },
     ],
     nytta: [
       "Ett professionellt ansikte utåt för {forening}",
       "Nyheter som når alla boende",
-      "Dokumenten som alla hittar själva",
+      "Ekonomin och dokumenten som alla hittar själva",
     ],
   },
   {
@@ -164,15 +167,9 @@ export const kapitel: VisningsKapitel[] = [
     id: "support",
     rubrik: "Vi sköter resten",
     kort: `Nyckeltalen, medlemmarnas inloggning och tekniken – ${PRIS}`,
+    // Att vi uppdaterar nyckeltalen berättar steget "dokument" i första kapitlet, där
+    // nyckeltalen visas.
     steg: [
-      {
-        id: "nyckeltal",
-        sida: "/ekonomi",
-        mal: ['[data-tour="ekonomi"] > :first-child', "main header"],
-        rubrik: "Vi uppdaterar nyckeltalen",
-        text: "Ekonomin visas i lättlästa nyckeltal, så att alla förstår den utan att läsa hela årsredovisningen. Varje år när den nya årsredovisningen är klar uppdaterar vi siffrorna åt er – skicka bara över den.",
-        nytta: "Ekonomin på hemsidan är alltid aktuell",
-      },
       {
         id: "medlemmar",
         sida: "/admin/supportlogg",

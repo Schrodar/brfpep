@@ -276,10 +276,12 @@ Se `src/lib/demo-admin.ts`. Utan `DEMO_MODE` svarar `/admin/demo` 404.
 
 **Guidad visning:** besökaren får en välkomstruta med en kapitelindelad rundtur
 (`src/components/demo/guidad-visning/`) – även utan `DEMO_MODE`. Rundturen har fyra korta
-kapitel, tio steg: hemsidan, styrelsens arbetsverktyg, försäljningen och "Vi sköter resten" –
-nyckeltalen som JnM uppdaterar efter varje årsredovisning, hjälpen med medlemmarnas inloggning
-och nya ledamöter, och sist priset (`PRIS` i `kapitel.ts`, samma som i webcrawlerns
-inställning "Pris i brevet"). Adminsidorna visas i
+kapitel, nio steg: hemsidan, styrelsens arbetsverktyg, försäljningen och "Vi sköter resten" –
+hjälpen med medlemmarnas inloggning och nya ledamöter, och sist priset (`PRIS` i
+`kapitel.ts`, samma som i webcrawlerns inställning "Pris i brevet"). Hemsidans sista steg
+visar `/ekonomi-och-dokument`: nyckeltalen, årsredovisningarna och stadgarna på en sida,
+och att JnM uppdaterar nyckeltalen efter varje årsredovisning. Sidan finns för visningen och
+ligger inte i menyn; `/ekonomi`, `/arsredovisningar` och `/stadgar` är som förut. Adminsidorna visas i
 adminpanelens visningsläge, som bara finns i demoläget, så utan `DEMO_MODE` hoppar
 visningen över dem. Demorutans knapp startar den (eller fortsätter där besökaren var), och
 knappen nere till vänster öppnar kapitelmenyn. Kapitel och texter redigeras i
