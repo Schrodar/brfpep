@@ -40,7 +40,9 @@ export default async function EkonomiOchDokumentPage() {
         />
 
         <div className="mt-10 grid gap-12 sm:mt-12 lg:grid-cols-[minmax(0,41rem)_minmax(0,1fr)] lg:gap-14">
-          <div data-tour="ekonomi-och-dokument" className="space-y-4 sm:space-y-5">
+          {/* self-start: blocket ska inte sträckas till förklaringens höjd – då räcker
+              markeringen i visningen en bit nedanför dokumentkorten. */}
+          <div data-tour="ekonomi-och-dokument" className="space-y-4 sm:space-y-5 lg:self-start">
             <Nyckeltal figures={figures} fiscalYear={economy.fiscalYear} />
 
             <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
